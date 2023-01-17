@@ -16,3 +16,6 @@ BuildLog.htm
 src/stlport/doc
 src/stlport/etc
 src/stlport/test
+/*build*
+/.vscode
+/.idea

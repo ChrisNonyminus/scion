@@ -18,7 +18,6 @@
  */
 
 #pragma once
-#include <Windows.h>
 #include "cIGZCOMLibrary.h"
 #include "cRZString.h"
 
@@ -41,8 +40,13 @@ public:
 	virtual void GetPath(cIGZString& output) const;
 	virtual bool SetPath(const cIGZString& path);
 
+#ifdef _WIN32
 	virtual HINSTANCE GetHandle() const;
 	virtual void SetHandle(HINSTANCE handle);
+#elif defined(__linux__)
+    virtual void* GetHandle() const;
+    virtual void SetHandle(void* handle);
+#endif
 
 	virtual cIGZCOMDirector* GetDirector() const;
 	virtual void SetDirector(cIGZCOMDirector* director);

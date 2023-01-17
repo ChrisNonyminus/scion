@@ -58,8 +58,16 @@ bool cRZMutex::IsValid()
 {
 	return mutex != NULL;
 }
+#ifdef _WIN32
 
 HANDLE cRZMutex::GetMutexHandle()
 {
 	return mutex;
 }
+#elif __linux__
+
+pthread_mutex_t* cRZMutex::GetMutexHandle()
+{
+	return &mutex;
+}
+#endif

@@ -33,9 +33,9 @@ cRZCmdLine::cRZCmdLine(char const* cmdLine)
 	// TODO
 }
 
-cRZCmdLine::~cRZCmdLine()
+/*cRZCmdLine::~cRZCmdLine()
 {
-}
+}*/
 
 bool cRZCmdLine::QueryInterface(GZIID iid, void** outPtr)
 {
@@ -114,7 +114,7 @@ int cRZCmdLine::Find(cIGZString const& searchTerm, bool caseSensitive) const
 		int index = 0;
 		do
 		{
-			cRZString const* haystack = it;
+			cRZString const* haystack = &(*it);
 			if (!caseSensitive)
 			{
 				tmpLower = *haystack;
@@ -167,7 +167,7 @@ int cRZCmdLine::FindSubString(cIGZString const& searchTerm, bool caseSensitive) 
 			else
 			{
 				findResult = it->Find(needle);
-				haystack = it;
+				haystack = &(*it);
 			}
 
 			if (findResult < haystack->Strlen())

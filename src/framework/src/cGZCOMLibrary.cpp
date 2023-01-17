@@ -157,14 +157,23 @@ bool cGZCOMLibrary::SetPath(const cIGZString& path)
 	return false;
 }
 
+#if defined(_WIN32)
 HINSTANCE cGZCOMLibrary::GetHandle() const
+#elif defined(__linux__)
+void* cGZCOMLibrary::GetHandle() const
+#endif
 {
-	return handle;
+    return handle;
 }
 
-void cGZCOMLibrary::SetHandle(HINSTANCE handle)
+#if defined(_WIN32)
+void
+cGZCOMLibrary::SetHandle(HINSTANCE handle)
+#elif defined(__linux__)
+void cGZCOMLibrary::SetHandle(void* handle)
+#endif
 {
-	this->handle = handle;
+    this->handle = handle;
 }
 
 cIGZCOMDirector* cGZCOMLibrary::GetDirector() const

@@ -18,10 +18,9 @@
  */
 
 #pragma once
-#include <hash_map>
+#include <unordered_map>
 #include <list>
 #include <map>
-#include <Windows.h>
 #include "cGZCOM.h"
 #include "cIGZFramework.h"
 #include "cIGZFrameworkHooks.h"
@@ -37,12 +36,15 @@ static const GZGUID GZCLSID_cGZFramework = 0x000003E8;
 class cIGZUnknownEnumerator;
 class cRZCmdLine;
 
-class cGZFramework : public cIGZFramework, public cIGZFrameworkW32
+class cGZFramework : public cIGZFramework,
+#ifdef _WIN32
+        public cIGZFrameworkW32
+#endif
 {
 private:
 	typedef std::list<cRZAutoRefCount<cIGZFrameworkHooks> > tHooksList;
 	typedef std::list<cRZAutoRefCount<cIGZSystemService> > tServicesList;
-	typedef std::hash_map<GZGUID, cRZAutoRefCount<cIGZSystemService> > tServicesIdMap;
+	typedef std::unordered_map<GZGUID, cRZAutoRefCount<cIGZSystemService> > tServicesIdMap;
 	typedef std::multimap<int32_t, cRZAutoRefCount<cIGZSystemService> > tServicesPriorityMap;
 
 public:
@@ -117,6 +119,7 @@ public:
 	virtual bool AppShutdown();
 	virtual bool PostAppShutdown();
 
+#ifdef _WIN32
 public:
 	virtual cIGZFramework* AsIGZFramework();
 	virtual void Run();
@@ -124,6 +127,7 @@ public:
 	virtual HINSTANCE GetWindowsInstance();
 	virtual HWND GetMainHWND();
 	virtual void SetMainHWND(HWND hwnd);
+#endif
 
 protected:
 	bool HookPreFrameworkInit();

@@ -18,7 +18,9 @@
  */
 
 #pragma once
+#ifdef _WIN32
 #include <Windows.h>
+#endif
 #include "cIGZUnknown.h"
 
 static const GZIID GZIID_cIGZFrameworkW32 = 0x23EA70A1;
@@ -30,8 +32,9 @@ class cIGZFrameworkW32 : public cIGZUnknown
 public:
 	virtual cIGZFramework* AsIGZFramework(void) = 0;
 	virtual void Run(void) = 0;
-
+#ifdef _WIN32
 	virtual HINSTANCE GetWindowsInstance(void) = 0;
 	virtual HWND GetMainHWND(void) = 0;
 	virtual void SetMainHWND(HWND hwnd) = 0;
+#endif
 };

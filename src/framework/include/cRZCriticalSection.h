@@ -19,7 +19,6 @@
 
 #pragma once
 #include <stdint.h>
-#include <Windows.h>
 #include "CriticalSectionPlatformData.h"
 
 class cRZCriticalSection

@@ -19,7 +19,7 @@
 
 #pragma once
 #include <deque>
-#include <hash_map>
+#include <unordered_map>
 #include <list>
 #include "cGZMessageQueue2.h"
 #include "cIGZMessage2.h"
@@ -102,7 +102,7 @@ protected:
 protected:
 	typedef std::list<cRZAutoRefCount<cIGZMessageTarget2> > MessageTargetList;
 	typedef std::list<DelayedAddOrRemove> DelayedNotificationList;
-	typedef std::hash_map<GZGUID, MessageTargetList*> MessageTargetMap;
+	typedef std::unordered_map<GZGUID, MessageTargetList*> MessageTargetMap;
 	typedef std::pair<GZGUID, MessageTargetList*> MessageTargetMapEntry;
 	typedef std::deque<GeneralMessageTargetInfo> GeneralMessageDeque;
 

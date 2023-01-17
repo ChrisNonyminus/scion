@@ -18,8 +18,13 @@
  */
 
 #pragma once
-#include <Windows.h>
 #include "cIGZUnknown.h"
+
+#ifdef _WIN32
+#include <windows.h>
+#elif defined(__linux__)
+#include <dlfcn.h>
+#endif
 
 class cIGZCOMDirector;
 class cIGZString;
@@ -35,8 +40,13 @@ public:
 	virtual void GetPath(cIGZString& output) const = 0;
 	virtual bool SetPath(const cIGZString& path) = 0;
 
+#if defined(_WIN32)
 	virtual HINSTANCE GetHandle() const = 0;
 	virtual void SetHandle(HINSTANCE handle) = 0;
+#elif defined(__linux__)
+    virtual void* GetHandle() const = 0;
+    virtual void SetHandle(void* handle) = 0;
+#endif
 
 	virtual cIGZCOMDirector* GetDirector() const = 0;
 	virtual void SetDirector(cIGZCOMDirector* director) = 0;

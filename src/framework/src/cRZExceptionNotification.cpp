@@ -19,6 +19,10 @@
 
 #include "cRZExceptionNotification.h"
 
+#ifdef APP_IS_SC4
+#include "SC4Statics.h"
+#endif
+
 cRZExceptionNotification::cRZExceptionNotification()
 {
 }
@@ -35,7 +39,7 @@ bool cRZExceptionNotification::QueryInterface(GZIID iid, void** outPtr)
 		AddRef();
 		return true;
 	}
-	else if (iid = GZIID_cIGZExceptionNotification)
+	else if (iid == GZIID_cIGZExceptionNotification)
 	{
 		*outPtr = static_cast<cIGZExceptionNotification*>(this);
 		AddRef();
@@ -65,6 +69,10 @@ uint32_t cRZExceptionNotification::Release()
 
 bool cRZExceptionNotification::Notify(char const* exceptionText, int address)
 {
+#ifdef APP_IS_SC4
+    cRZString str(exceptionText);
+    SC4OSMessageBoxAlert(str);
+#endif
 	// TODO: This probably does actual work on W32
 	return true;
 }

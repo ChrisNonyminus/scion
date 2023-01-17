@@ -140,7 +140,7 @@ public:
 	virtual bool RefIGZUnknown(GZIID iid, void** out) = 0;
 	virtual void RefIGZUnknown(cIGZUnknown* src) = 0;
 
-	virtual ~cIGZVariant();
+	virtual ~cIGZVariant() {}
 };
 
 #undef DECL_VARIANT_RETURN_AS

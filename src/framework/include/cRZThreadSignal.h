@@ -18,7 +18,6 @@
  */
 
 #pragma once
-#include <Windows.h>
 #include "cIGZThreadSignal.h"
 #include "GZTypes.h"
 #include "SignalPlatformData.h"

@@ -103,7 +103,7 @@ bool cGZFramework::AddSystemService(cIGZSystemService* service)
 		{
 			servicesByPriority.insert(tServicesPriorityMap::value_type(priority, cRZAutoRefCount<cIGZSystemService>(service)));
 			
-			servicesById.resize(servicesById.size() + 1);
+			//servicesById.resize(servicesById.size() + 1);
 			servicesById.insert(tServicesIdMap::value_type(serviceId, cRZAutoRefCount<cIGZSystemService>(service)));
 
 			return true;
@@ -870,6 +870,7 @@ bool cGZFramework::PostAppShutdown(void)
 	return result;
 }
 
+#ifdef _WIN32
 cIGZFramework* cGZFramework::AsIGZFramework(void)
 {
 	return static_cast<cIGZFramework*>(this);
@@ -922,7 +923,7 @@ void cGZFramework::SetMainHWND(HWND hwnd)
 {
 	mainHwnd = hwnd;
 }
-
+#endif
 bool cGZFramework::HookPreFrameworkInit()
 {
 	if (!isHookListLocked)

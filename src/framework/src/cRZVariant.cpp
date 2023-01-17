@@ -20,6 +20,8 @@
 #include "cIGZString.h"
 #include "cRZVariant.h"
 
+#include <memory.h>
+
 cRZVariant::cRZVariant()
 {
 }
@@ -136,13 +138,13 @@ cRZVariant::~cRZVariant()
 
 bool cRZVariant::QueryInterface(GZIID iid, void** outPtr)
 {
-	if (iid = GZIID_cIGZUnknown)
+	if (iid == GZIID_cIGZUnknown)
 	{
 		*outPtr = static_cast<cIGZUnknown*>(this);
 		AddRef();
 		return true;
 	}
-	else if (iid = GZIID_cIGZVariant)
+	else if (iid == GZIID_cIGZVariant)
 	{
 		*outPtr = static_cast<cIGZVariant*>(this);
 		AddRef();
@@ -480,3 +482,54 @@ IMPL_VARIANT_TYPE(Float64, double);
 IMPL_VARIANT_TYPE(Char, char);
 IMPL_VARIANT_TYPE(RZUnicodeChar, wchar_t);
 IMPL_VARIANT_TYPE(RZChar, char);
+bool cRZVariant::GetValVoidPtr(void *&dest) const {
+    if (this->typeTag == tagRZVariant::VoidPtr) {
+        dest = this->data.VoidPtr;
+        return true;
+    }
+    else {
+        cRZVariant tmp;
+        tmp.typeTag = tagRZVariant::VoidPtr;
+        bool succeeded = ConvertTypes(*this, tmp);
+        if (succeeded) { dest = tmp.data.VoidPtr; }
+        return succeeded;
+    }
+}
+void *cRZVariant::GetValVoidPtr() const {
+    void *val;
+    GetValVoidPtr(val);
+    return val;
+}
+void cRZVariant::SetValVoidPtr(void *value) {
+    if (typeTag != tagRZVariant::VoidPtr && typeTag != tagRZVariant::VoidPtr) { Destroy(); }
+}
+void **cRZVariant::RefVoidPtr() const { return reinterpret_cast<void **>(data.VoidPtr); }
+void cRZVariant::RefVoidPtr(void *const *values, uint32_t count) {
+    if (typeTag == (tagRZVariant::Array | tagRZVariant::VoidPtr) && arrayCount == count && data.VoidPtr != 0 &&
+        values != 0) { memcpy(data.VoidPtr, values, count * sizeof(void *)); }
+    else {
+        Destroy();
+        data.VoidPtr = new void *[count];
+        if (values != 0) { memcpy(data.VoidPtr, values, count * sizeof(void *)); }
+        arrayCount = count;
+        typeTag = (tagRZVariant::Array | tagRZVariant::VoidPtr);
+    }
+}
+
+void *cRZVariant::RefVoid() const { return reinterpret_cast<void *>(data.VoidPtr); }
+void cRZVariant::RefVoid(void const *values, uint32_t count) {
+    if (typeTag == (tagRZVariant::Array | tagRZVariant::Void) && arrayCount == count && data.VoidPtr != 0 &&
+        values != 0) { memcpy(data.VoidPtr, values, count); }
+    else {
+        Destroy();
+        data.VoidPtr = new uint8_t[count];
+        if (values != 0) { memcpy(data.VoidPtr, values, count); }
+        arrayCount = count;
+        typeTag = (tagRZVariant::Array | tagRZVariant::Void);
+    }
+}
+
+cRZVariant &cRZVariant::operator=(const cIGZVariant &other) {
+    CopyFrom(other);
+    return *this;
+}

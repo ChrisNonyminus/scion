@@ -55,3 +55,5 @@ protected:
 	int32_t tickPriority;
 	bool running;
 };
+
+#define RZ_SERVICE_ID(classname, id) static const GZGUID RZSRVID_##classname = id

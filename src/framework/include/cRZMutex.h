@@ -18,7 +18,12 @@
  */
 
 #pragma once
+
+#ifdef _WIN32
 #include <Windows.h>
+#elif __linux__
+#include <pthread.h>
+#endif
 
 class cIGZString;
 
@@ -34,8 +39,15 @@ public:
 	virtual bool IsValid();
 	virtual ~cRZMutex();
 
+#ifdef _WIN32
 	virtual HANDLE GetMutexHandle();
 
 protected:
 	HANDLE mutex;
+#elif __linux__
+    virtual pthread_mutex_t* GetMutexHandle();
+
+protected:
+    pthread_mutex_t mutex;
+#endif
 };

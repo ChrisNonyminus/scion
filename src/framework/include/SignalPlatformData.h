@@ -18,7 +18,6 @@
  */
 
 #pragma once
-#include <Windows.h>
 #include "cRZCriticalSection.h"
 #include "cRZString.h"
 

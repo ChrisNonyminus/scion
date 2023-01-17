@@ -30,3 +30,145 @@ public:
 	virtual uint32_t AddRef() = 0;
 	virtual uint32_t Release() = 0;
 };
+
+#define IUNKNOWN_COMMON_DEFS                                                   \
+    uint32_t m_uiRefCount{0};                                                  \
+    uint32_t AddRef() override;                                                \
+    uint32_t Release() override;                                               \
+    bool QueryInterface(uint32_t uiClsId, void **ppvObj) override;
+
+#define GZ_IUNKNOWN_ID(classname, id) static const GZIID GZIID_##classname = id
+
+
+#define IMPL_IGZUNKNOWN(ClassName, InterfaceClsid)                             \
+    uint32_t ClassName::AddRef() { return ++m_uiRefCount; }                    \
+    uint32_t ClassName::Release() {                                            \
+        uint32_t uiRefCount = --m_uiRefCount;                                  \
+        if (uiRefCount == 0) {                                                 \
+            delete this;                                                       \
+        }                                                                      \
+        return uiRefCount;                                                     \
+    }                                                                          \
+    bool ClassName::QueryInterface(uint32_t uiClsId, void **ppvObj) {      \
+        if (ppvObj == NULL) {                                                  \
+            return 0;                                                          \
+        }                                                                      \
+        if (uiClsId == InterfaceClsid || uiClsId == 1) {                       \
+            *ppvObj = this;                                                    \
+        } else {                                                               \
+            *ppvObj = NULL;                                                    \
+            return false;                                                          \
+        }                                                                      \
+        AddRef();                                                              \
+        return true;                                                              \
+    }
+#define CLSID_MATCH(clsid) || uiClsId == clsid
+#define IMPL_IGZUNKNOWN_MULTIPLE_CLSIDS_LAZY_MACRO(ClassName, ...)             \
+    uint32_t ClassName::AddRef() { return ++m_uiRefCount; }                    \
+    uint32_t ClassName::Release() {                                            \
+        uint32_t uiRefCount = --m_uiRefCount;                                  \
+        if (uiRefCount == 0) {                                                 \
+            delete this;                                                       \
+        }                                                                      \
+        return uiRefCount;                                                     \
+    }                                                                          \
+    bool ClassName::QueryInterface(uint32_t uiClsId, void **ppvObj) {      \
+        if (ppvObj == NULL) {                                                  \
+            return false;                                                          \
+        }                                                                      \
+        if (uiClsId == 1 FOR_EACH(CLSID_MATCH, __VA_ARGS__)) {                 \
+            *ppvObj = this;                                                    \
+        } else {                                                               \
+            *ppvObj = NULL;                                                    \
+            return false;                                                          \
+        }                                                                      \
+        AddRef();                                                              \
+        return true;                                                              \
+    }
+#define CLSID_MATCH_BY_NAME(cls)                                               \
+    if (uiClsId == GZIID_##cls) {                                                \
+        *ppvObj = static_cast<cls *>(this);                                    \
+    } else
+#define IMPL_IGZUNKNOWN_MULTIPLE_CLSIDS_BY_NAME_LAZY_MACRO(ClassName, ...)     \
+    uint32_t ClassName::AddRef() { return ++m_uiRefCount; }                    \
+    uint32_t ClassName::Release() {                                            \
+        uint32_t uiRefCount = --m_uiRefCount;                                  \
+        if (uiRefCount == 0) {                                                 \
+            delete this;                                                       \
+        }                                                                      \
+        return uiRefCount;                                                     \
+    }                                                                          \
+    bool ClassName::QueryInterface(uint32_t uiClsId, void **ppvObj) {      \
+        if (ppvObj == NULL) {                                                  \
+            return false;                                                          \
+        }                                                                      \
+        *ppvObj = NULL;                                                        \
+        FOR_EACH(CLSID_MATCH_BY_NAME, __VA_ARGS__) { return 0; }               \
+        AddRef();                                                              \
+        return true;                                                              \
+    }
+#define IMPL_IGZUNKNOWN_CALL_SUPERCLASS_QUERYINTERFACE(ClassName, SuperClass,  \
+                                                       InterfaceClsid)         \
+    uint32_t ClassName::AddRef() { return ++m_uiRefCount; }                    \
+    uint32_t ClassName::Release() {                                            \
+        uint32_t uiRefCount = --m_uiRefCount;                                  \
+        if (uiRefCount == 0) {                                                 \
+            delete this;                                                       \
+        }                                                                      \
+        return uiRefCount;                                                     \
+    }                                                                          \
+    bool ClassName::QueryInterface(uint32_t uiClsId, void **ppvObj) {      \
+        if (ppvObj == NULL) {                                                  \
+            return false;                                                          \
+        }                                                                      \
+        if (uiClsId == InterfaceClsid || uiClsId == 1) {                       \
+            *ppvObj = this;                                                    \
+        } else {                                                               \
+            return SuperClass::QueryInterface(uiClsId, ppvObj);                \
+        }                                                                      \
+        AddRef();                                                              \
+        return true;                                                              \
+    }
+#define IMPL_IGZUNKNOWN_MULTIPLE_CLSIDS_CALL_SUPERCLASS_QUERYINTERFACE(        \
+    ClassName, SuperClass, ...)                                                \
+    uint32_t ClassName::AddRef() { return ++m_uiRefCount; }                    \
+    uint32_t ClassName::Release() {                                            \
+        uint32_t uiRefCount = --m_uiRefCount;                                  \
+        if (uiRefCount == 0) {                                                 \
+            delete this;                                                       \
+        }                                                                      \
+        return uiRefCount;                                                     \
+    }                                                                          \
+    bool ClassName::QueryInterface(uint32_t uiClsId, void **ppvObj) {      \
+        if (ppvObj == NULL) {                                                  \
+            return false;                                                          \
+        }                                                                      \
+        if (uiClsId == 1 FOR_EACH(CLSID_MATCH, __VA_ARGS__)) {                 \
+            *ppvObj = this;                                                    \
+        } else {                                                               \
+            return SuperClass::QueryInterface(uiClsId, ppvObj);                \
+        }                                                                      \
+        AddRef();                                                              \
+        return true;                                                              \
+    }
+#define IMPL_IGZUNKNOWN_CALL_SUPERCLASS_QUERYINTERFACE_BY_NAME(                \
+    ClassName, SuperClass, ...)                                                \
+    uint32_t ClassName::AddRef() { return ++m_uiRefCount; }                    \
+    uint32_t ClassName::Release() {                                            \
+        uint32_t uiRefCount = --m_uiRefCount;                                  \
+        if (uiRefCount == 0) {                                                 \
+            delete this;                                                       \
+        }                                                                      \
+        return uiRefCount;                                                     \
+    }                                                                          \
+    bool ClassName::QueryInterface(uint32_t uiClsId, void **ppvObj) {      \
+        if (ppvObj == NULL) {                                                  \
+            return false;                                                          \
+        }                                                                      \
+        *ppvObj = NULL;                                                        \
+        FOR_EACH(CLSID_MATCH_BY_NAME, __VA_ARGS__) {                           \
+            return SuperClass::QueryInterface(uiClsId, ppvObj);                \
+        }                                                                      \
+        AddRef();                                                              \
+        return true;                                                              \
+    }

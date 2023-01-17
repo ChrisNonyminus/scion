@@ -18,9 +18,12 @@
  */
 
 #include <cstring>
-#include <Windows.h>
 #include "cRZKeyboard.h"
 #include "RZStatics.h"
+
+#ifdef USING_SDL2
+#include <SDL.h>
+#endif
 
 cRZKeyboard::cRZKeyboard()
 {
@@ -57,7 +60,7 @@ bool cRZKeyboard::IsKeyDownNow(uint32_t key)
 
 bool cRZKeyboard::CharIsModifier(uint32_t key)
 {
-	switch (key)
+	/*switch (key)
 	{
 	case VK_SHIFT:
 	case VK_CONTROL:
@@ -66,18 +69,43 @@ bool cRZKeyboard::CharIsModifier(uint32_t key)
 
 	default:
 		return false;
-	}
+	}*/
+#ifdef USING_SDL2
+    switch (key)
+    {
+    case SDLK_LSHIFT:
+    case SDLK_RSHIFT:
+    case SDLK_LCTRL:
+    case SDLK_RCTRL:
+    case SDLK_LALT:
+    case SDLK_RALT:
+        return true;
+
+    default:
+        return false;
+    }
+#endif
 }
 
 uint32_t cRZKeyboard::GetCurrentModifierState()
 {
-	uint32_t modifiers = 0;
+	/*uint32_t modifiers = 0;
 
 	if (IsKeyDown(VK_SHIFT))   modifiers |= kShiftModifier;
 	if (IsKeyDown(VK_CONTROL)) modifiers |= kControlModifier;
 	if (IsKeyDown(VK_MENU))    modifiers |= kMenuModifier;
 
-	return modifiers;
+	return modifiers;*/
+
+    uint32_t modifiers = 0;
+
+#ifdef USING_SDL2
+    if (IsKeyDown(SDLK_LSHIFT) || IsKeyDown(SDLK_RSHIFT)) modifiers |= kShiftModifier;
+    if (IsKeyDown(SDLK_LCTRL) || IsKeyDown(SDLK_RCTRL)) modifiers |= kControlModifier;
+    if (IsKeyDown(SDLK_LALT) || IsKeyDown(SDLK_RALT)) modifiers |= kMenuModifier;
+#endif
+
+        return modifiers;
 }
 
 bool cRZKeyboard::IsToggleKeySet(uint32_t key)
@@ -110,5 +138,19 @@ bool cRZKeyboard::IsKeyDownNowStatic(uint32_t key)
 
 bool cRZKeyboard::IsToggleKeySetStatic(uint32_t key)
 {
-	return (GetKeyState(key) & 1) != 0;
+	//return (GetKeyState(key) & 1) != 0;
+#if defined(USING_SDL2)
+    SDL_Event event;
+    if (SDL_PollEvent(&event))
+    {
+        if (event.type == SDL_KEYDOWN)
+        {
+            if (event.key.keysym.sym == key)
+            {
+                return true;
+            }
+        }
+    }
+#endif
+    return false;
 }

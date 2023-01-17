@@ -45,7 +45,7 @@ bool cRZOStream::QueryInterface(GZIID iid, void** outPtr)
 		AddRef();
 		return true;
 	}
-	else if (iid = GZIID_cIGZOStream)
+	else if (iid == GZIID_cIGZOStream)
 	{
 		*outPtr = static_cast<cIGZOStream*>(this);
 		AddRef();

@@ -23,9 +23,18 @@
 class cIGZFramework;
 class cIGZString;
 class cRZCOMDllDirector;
+class cIGZWinMgr;
+class cIGZCOM;
 
 extern cIGZFramework* RZGetFramework();
 extern cRZCOMDllDirector* RZGetCOMDllDirector();
 //extern void RZGetCurrentAppPath(cIGZString& output);
 
 extern bool RZIsKeyDownNow(uint32_t key);
+
+extern cIGZCOM* GZCOM();
+
+// helper functions for getting commonly used system service interfaces
+namespace RZ {
+    cIGZWinMgr *WM();
+}   // namespace RZ

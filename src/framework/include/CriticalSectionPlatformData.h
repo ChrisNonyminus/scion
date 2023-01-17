@@ -18,11 +18,22 @@
  */
 
 #pragma once
+
+#ifdef _WIN32
 #include <Windows.h>
+#elif defined(__linux__)
+#include <pthread.h>
+#endif
+
+
 
 struct CriticalSectionPlatformData
 {
 public:
+#ifdef _WIN32
 	CRITICAL_SECTION criticalSection;
+#elif defined(__linux__)
+    pthread_mutex_t criticalSection;
+#endif
 	uint32_t lockCount;
 };

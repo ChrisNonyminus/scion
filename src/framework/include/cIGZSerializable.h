@@ -30,3 +30,5 @@ public:
 	virtual bool Read(cIGZIStream& in) = 0;
 	virtual GZCLSID GetCLSID() const = 0;
 };
+
+GZ_IUNKNOWN_ID(cIGZSerializable, 0xA9BEE9AC);
