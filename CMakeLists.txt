@@ -27,6 +27,12 @@ if (USING_OPENGL)
     find_package(OpenGL REQUIRED)
     target_link_libraries(scion_SimCity4 OpenGL::GL)
     target_compile_definitions(scion_SimCity4 PUBLIC USING_OPENGL)
+
+    # glm
+    add_subdirectory("third_party/glm")
+    target_link_libraries(scion_SimCity4 ${GLM_LIBRARIES})
+    target_include_directories(scion_SimCity4 PUBLIC ${GLM_INCLUDE_DIRS})
+
 endif ()
 
 if (USING_SDL2)

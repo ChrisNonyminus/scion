@@ -26,11 +26,9 @@ struct cIGZWin;
 struct cIGZMessageFilter : public cIGZUnknown {};
 
 struct cIGZWinMgr : public cIGZUnknown {
-    static const uint32_t CLSID = 1444;
-    static const uint32_t ServiceID = 0xA417445E;
 };
-static const GZIID GZIID_cIGZWinMgr = cIGZWinMgr::CLSID;
-static const GZGUID RZSRVID_cGZWinMgr = cIGZWinMgr::ServiceID;
+static const GZIID GZIID_cIGZWinMgr = 1444;
+static const GZGUID RZSRVID_cGZWinMgr = 0xA417445E;
 
 struct cGZWinMgrBase : public cIGZWinMgr, public cRZSystemService {
     struct MessageTargetInfo {};
@@ -52,14 +50,18 @@ struct cGZWinMgrBase : public cIGZWinMgr, public cRZSystemService {
     bool field_1C8{true}, field_1C9{false}, field_1CA{true}, field_1CB{true},
             field_1CC{true}, field_1CD{false}, field_1CE{true};
     cGZWinMgrBase();
+
+    bool QueryInterface(GZIID iid, void **outPtr) override;
+
+    uint32_t AddRef(void) override;
+
+    uint32_t Release(void) override;
 };
 
 struct cIGZWinCtrlMgr : public cIGZUnknown {
-    static const uint32_t CLSID = 0x22C2EB1F;
-    static const uint32_t ServiceID = 0xC2C2EB0F;
 };
-static const GZIID GZIID_cIGZWinCtrlMgr = cIGZWinCtrlMgr::CLSID;
-static const GZGUID RZSRVID_cGZWinCtrlMgr = cIGZWinCtrlMgr::ServiceID;
+static const GZIID GZIID_cIGZWinCtrlMgr = 0x22C2EB1F;
+static const GZGUID RZSRVID_cGZWinCtrlMgr = 0xC2C2EB0F;
 
 struct cGZWinCtrlMgr : public cIGZWinCtrlMgr, public cRZSystemService {
     int field_20{0}, field_24{0}, field_28{0};
@@ -67,7 +69,7 @@ struct cGZWinCtrlMgr : public cIGZWinCtrlMgr, public cRZSystemService {
 
 #ifdef USING_SDL2
 struct cGZWinMgrSDL2 : public cGZWinMgrBase {
-    cGZWinMgrSDL2(int width, int height);
+    cGZWinMgrSDL2();
 
     SDL_Window *m_Window;
     SDL_Renderer *m_Renderer;

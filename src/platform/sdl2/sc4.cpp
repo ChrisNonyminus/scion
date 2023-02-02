@@ -1,7 +1,9 @@
+
 #include "cSC4App.h"
 #include <SDL.h>
 
 #include "SC4Statics.h"
+#include "RZStatics.h"
 
 
 static const char *kUserTag = "Posted-01/28/04";
@@ -14,12 +16,9 @@ int main(int argc, char *argv[]) {
     }
     cRZCmdLine cmdLine(args.c_str());
 
-    /* New code: Initialize SDL *//*
-    if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
-        fprintf(stderr, "Couldn't initialize SDL: %s\n", SDL_GetError());
-        exit(1);
+    if (!Display::Initialize()) {
+        return 1;
     }
-    *//* End new code */
 
     if (/*Initialize(args) &&*/ kUserTag /*???*/) {
         SC4AppStart(&cmdLine, false);

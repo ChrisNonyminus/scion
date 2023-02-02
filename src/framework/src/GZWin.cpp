@@ -4,36 +4,33 @@
 #include "GZWin.h"
 
 #ifdef USING_SDL2
+
 #include "include/SDL.h"
+
 #endif
 
-#ifdef _WIN32
-cGZWinMgrW32::cCanvasMessageTarget::~cCanvasMessageTarget() {}
-uint32_t cGZWinMgrW32::cCanvasMessageTarget::AddRef() { return 0; }
-uint32_t cGZWinMgrW32::cCanvasMessageTarget::Release() { return 0; }
-bool cGZWinMgrW32::cCanvasMessageTarget::QueryInterface(uint32_t uiClsId,
-                                                            void **ppvObj) {
-    return false;
-}
-cGZWinMgrW32::cMouseMessageTarget::~cMouseMessageTarget() {}
-uint32_t cGZWinMgrW32::cMouseMessageTarget::AddRef() { return 0; }
-uint32_t cGZWinMgrW32::cMouseMessageTarget::Release() { return 0; }
-bool cGZWinMgrW32::cMouseMessageTarget::QueryInterface(uint32_t uiClsId,
-                                                           void **ppvObj) {
-    return false;
-}
-cGZWinMgrW32::cKeyMessageTarget::~cKeyMessageTarget() {}
-uint32_t cGZWinMgrW32::cKeyMessageTarget::AddRef() { return 0; }
-uint32_t cGZWinMgrW32::cKeyMessageTarget::Release() { return 0; }
-bool cGZWinMgrW32::cKeyMessageTarget::QueryInterface(uint32_t uiClsId,
-                                                         void **ppvObj) {
-    return 0;
-}
-#endif
 cGZWinMgrBase::cGZWinMgrBase()
-        : cRZSystemService(cIGZWinMgr::ServiceID, 1250000) {}
+        : cRZSystemService(RZSRVID_cGZWinMgr, 1250000) {}
+
+bool cGZWinMgrBase::QueryInterface(GZIID iid, void **outPtr) {
+    if (iid == GZIID_cIGZWinMgr) {
+        *outPtr = static_cast<cIGZWinMgr *>(this);
+        return true;
+    }
+    return cRZSystemService::QueryInterface(iid, outPtr);
+}
+
+uint32_t cGZWinMgrBase::AddRef(void) {
+    return cRZSystemService::AddRef();
+}
+
+uint32_t cGZWinMgrBase::Release(void) {
+    return cRZSystemService::Release();
+}
+
 #ifdef USING_SDL2
-cGZWinMgrSDL2::cGZWinMgrSDL2(int width, int height) {
+
+cGZWinMgrSDL2::cGZWinMgrSDL2() {
 #ifdef USING_OPENGL
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
@@ -48,7 +45,8 @@ cGZWinMgrSDL2::cGZWinMgrSDL2(int width, int height) {
 #if defined(USING_OPENGL)
     winFlags |= SDL_WINDOW_OPENGL;
 #endif
-    m_Window = SDL_CreateWindow(SZ_DEFAULT_APP_TITLE, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, winFlags);
+    m_Window = SDL_CreateWindow(SZ_DEFAULT_APP_TITLE, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1024, 768,
+                                winFlags);
     if (m_Window == nullptr) {
         printf("SDL_CreateWindow failed: %s\n", SDL_GetError());
         return;
@@ -65,11 +63,49 @@ cGZWinMgrSDL2::cGZWinMgrSDL2(int width, int height) {
         printf("SDL_CreateRenderer failed: %s\n", SDL_GetError());
         return;
     }
-    m_Texture = SDL_CreateTexture(m_Renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, width, height);
+    m_Texture = SDL_CreateTexture(m_Renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, 1024, 768);
     if (m_Texture == nullptr) {
         printf("SDL_CreateTexture failed: %s\n", SDL_GetError());
         return;
     }
 
 }
+
+#endif
+
+#ifdef _WIN32
+
+cGZWinMgrW32::cCanvasMessageTarget::~cCanvasMessageTarget() {}
+
+uint32_t cGZWinMgrW32::cCanvasMessageTarget::AddRef() { return 0; }
+
+uint32_t cGZWinMgrW32::cCanvasMessageTarget::Release() { return 0; }
+
+bool cGZWinMgrW32::cCanvasMessageTarget::QueryInterface(uint32_t uiClsId,
+                                                        void **ppvObj) {
+    return false;
+}
+
+cGZWinMgrW32::cMouseMessageTarget::~cMouseMessageTarget() {}
+
+uint32_t cGZWinMgrW32::cMouseMessageTarget::AddRef() { return 0; }
+
+uint32_t cGZWinMgrW32::cMouseMessageTarget::Release() { return 0; }
+
+bool cGZWinMgrW32::cMouseMessageTarget::QueryInterface(uint32_t uiClsId,
+                                                       void **ppvObj) {
+    return false;
+}
+
+cGZWinMgrW32::cKeyMessageTarget::~cKeyMessageTarget() {}
+
+uint32_t cGZWinMgrW32::cKeyMessageTarget::AddRef() { return 0; }
+
+uint32_t cGZWinMgrW32::cKeyMessageTarget::Release() { return 0; }
+
+bool cGZWinMgrW32::cKeyMessageTarget::QueryInterface(uint32_t uiClsId,
+                                                     void **ppvObj) {
+    return 0;
+}
+
 #endif

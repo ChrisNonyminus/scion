@@ -1,0 +1,8 @@
+Aims to load specific x86-32 Maxis mac games on linux as blobs via MMAP, and replaces specific functions.
+
+External Libraries used:
+-MALoader
+-DXVK
+-OpenSSL
+-lua (You have to download and compile Lua 5.0 yourself right now, but for compiling the sims 2 you can probably just remove the linking to lua and it'll be safe, probably)
+-Mac OS X's Carbon framework (as headers; code is still reimplemented when implementing mac os functions)

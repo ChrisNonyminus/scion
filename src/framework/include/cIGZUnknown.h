@@ -172,3 +172,4 @@ public:
         AddRef();                                                              \
         return true;                                                              \
     }
+
