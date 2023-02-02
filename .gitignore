@@ -26,12 +26,10 @@ Game/
 *.a
 *.o
 *.spec
-usr/
 *.so
 
 *.x86
-./sc4
-./sims2
+/src/platform/blobs/sc4
 *.nam
 *.id*
 *.til
@@ -43,5 +41,6 @@ build/
 !*_winapi_*.txt
 wine-git/
 *.dxvk-cache
-usr/
 *.dylib
+dxvk-native-master/
+/src/platform/blobs/sims2

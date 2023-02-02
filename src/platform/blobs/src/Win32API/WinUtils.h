@@ -16,4 +16,6 @@ struct IUnknown {
 #define DWORD uint32_t
 #define LONG int32_t
 
+extern uint32_t sLastError;
+
 #endif

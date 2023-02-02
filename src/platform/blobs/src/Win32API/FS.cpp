@@ -154,10 +154,12 @@ bool ReadFile(HANDLE hFile,
               void *lpOverlapped) {
   *lpNumberOfBytesRead = 0;
   if (hFile == NULL) {
+    sLastError = 5;
     return false;
   }
   FILE *fp = (FILE *) hFile->ptr;
   if (fp == NULL) {
+    sLastError = 5;
     return false;
   }
   char filename[PATH_MAX];

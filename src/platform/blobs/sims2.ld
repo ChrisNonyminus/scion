@@ -22,6 +22,8 @@ _ZN9cRZThreadC1Ev = 0x005338D4;
 
 _ZN16cTSPersistSystem18ForceOpenResourcesEPv = 0x007D06BC;
 
+sLastError = 0x00032A37;
+
 SECTIONS
 {
     . = 0x04000000;

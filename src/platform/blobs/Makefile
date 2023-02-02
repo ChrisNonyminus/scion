@@ -1,3 +1,6 @@
+TARGET_GAME ?= sims2
+
+SHELL := bash
 
 CC := i686-linux-gnu-g++-12
 LD := i686-linux-gnu-ld
@@ -35,6 +38,8 @@ ALL_OBJECTS += build/macho-loader/log.o
 ALL_OBJECTS += build/macho-loader/fat.o
 #ALL_OBJECTS += build/macho-loader/ld-mac.o
 
+.PHONY: dxvk-native openssl-0.9.7 mac-headers
+
 # For each framework in the src/MacFrameworks/MacOSX10.4u.sdk/System/Library/Frameworks folder (recursive, folder name ends with .framework), make a symlink in build/src/MacFrameworks that points to the headers folder, but named after the framework name (without the .framework extension), if it doesn't already exist
 # This is so that the gcc linux compiler can find the headers
 mac-headers:
@@ -49,9 +54,10 @@ mac-headers:
 
 CFLAGS := -I$(GAME_INC) -I$(FRAMEWORK_INC) -I$(PLATFORM_INC) -O0 -g -std=c++03  -DTARGET_GAME_${TARGET_GAME} -Wall
 MAC_CFLAGS :=  -Wno-multichar -Isrc/MacFrameworks/MacOSX10.4u.sdk/Developer/Headers/CFMCarbon -Ibuild/src/MacFrameworks -Ibuild/src -Imacho-loader/include -Imacho-loader
-CFLAGS += $(MAC_CFLAGS)  -Wno-unknown-pragmas -Idxvk-native/include -Idxvk-native/include -Idxvk-native/include/native  -Idxvk-native/include/native/windows  -Idxvk-native/include/native/directx -Ithird_party/openssl-0.9.7/include
-CFLAGS += -D_GLIBCXX_USE_CXX11_ABI=0 -fabi-version=2
+
 CXXFLAGS = $(CFLAGS)
+CXXFLAGS += $(MAC_CFLAGS)  -Wno-unknown-pragmas -Idxvk-native/include -Idxvk-native/include -Idxvk-native/include/native  -Idxvk-native/include/native/windows  -Idxvk-native/include/native/directx -Ithird_party/openssl-0.9.7/include
+CXXFLAGS += -D_GLIBCXX_USE_CXX11_ABI=0 -fabi-version=2
 CXXFLAGS += -ggdb -fsanitize=address -fno-omit-frame-pointer
 
 
@@ -64,7 +70,7 @@ libmac.so: build/macho-loader/libmac/mac.o build/macho-loader/libmac/strmode.o
 clean:
 	rm -rf build
 	rm -f $(TARGET_GAME)
-	#rm -rf dxvk-native/dxvk-native-master
+	#rm -rf dxvk-native-master
 	#rm -rf third_party/openssl-1.1.1s/build
 
 build:
@@ -78,10 +84,12 @@ build:
 	mkdir -p build/macho-loader/libmac
 
 dxvk-native:
-	$(CC=i686-linux-gnu-gcc-12 CXX=i686-linux-gnu-g++-12 cd dxvk && bash ./package-native.sh master ./ --no-package --dev-build)
+ifeq ($(wildcard ./dxvk-native-master/.),)
+	$(shell CC=i686-linux-gnu-gcc-12 CXX=i686-linux-gnu-g++-12  ./dxvk/package-native.sh master ./ --no-package --dev-build)
+endif
 
 openssl-0.9.7:
-	$(CC=i686-linux-gnu-gcc-12 CXX=i686-linux-gnu-g++-12 cd third_party/openssl-0.9.7 && make)
+	cd third_party/openssl-0.9.7 && $(MAKE)
 
 build/%.o: %.cpp mac-headers
 	ccache $(CC) -m32 $(CXXFLAGS) -c $< -o $@
@@ -97,7 +105,7 @@ endif
 
 
 $(TARGET_GAME): check-env build dxvk-native openssl-0.9.7 $(ALL_OBJECTS) libmac.so
-	cp dxvk/dxvk-native-master/usr/lib32/libdxvk_d3d9.so .
+	cp dxvk-native-master/usr/lib32/libdxvk_d3d9.so .
 	$(CC) -m32 -g -o $@ -T $(TARGET_GAME).ld -Wl,-Map,build/$@.map -fabi-version=2 $(ALL_OBJECTS) -std=c++98 -l:libboost_system.a -l:libboost_filesystem.a -L/usr/local/i386-linux-gnu/lib -llua -llualib `sdl2-config --libs` -lGL -ldl   -L. -ldxvk_d3d9 -l:third_party/openssl-0.9.7/libssl.a -l:third_party/openssl-0.9.7/libcrypto.a -lvulkan  -ggdb -fsanitize=address -fno-omit-frame-pointer -static-libasan -lrt
 
 
