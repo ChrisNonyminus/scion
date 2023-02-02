@@ -34,7 +34,6 @@ Game/
 *.id*
 *.til
 *.log
-*.txt
 build/
 *.dat
 !*_imp_*.txt

@@ -12,9 +12,9 @@ SHLIB_VERSION_HISTORY=
 SHLIB_MAJOR=0
 SHLIB_MINOR=9.7
 SHLIB_EXT=.so.$(SHLIB_MAJOR).$(SHLIB_MINOR)
-PLATFORM=linux-pentium
+PLATFORM=linux-x86_64
 OPTIONS= no-krb5
-CONFIGURE_ARGS=linux-pentium
+CONFIGURE_ARGS=linux-x86_64
 SHLIB_TARGET=linux-shared
 
 # HERE indicates where this Makefile lives.  This can be used to indicate
@@ -61,7 +61,7 @@ OPENSSLDIR=/usr/local/ssl
 
 CC= gcc
 #CFLAG= -DL_ENDIAN -DTERMIO -O3 -fomit-frame-pointer -m486 -Wall -Wuninitialized -DSHA1_ASM -DMD5_ASM -DRMD160_ASM
-CFLAG= -DOPENSSL_THREADS -D_REENTRANT -DDSO_DLFCN -DHAVE_DLFCN_H -DOPENSSL_NO_KRB5 -DL_ENDIAN -DTERMIO -O3 -fomit-frame-pointer -mcpu=pentium -Wall -DSHA1_ASM -DMD5_ASM -DRMD160_ASM
+CFLAG= -DOPENSSL_THREADS -D_REENTRANT -DDSO_DLFCN -DHAVE_DLFCN_H -DOPENSSL_NO_KRB5 -m64 -DL_ENDIAN -DTERMIO -O3 -Wall -DMD32_REG_T=int
 DEPFLAG= 
 PEX_LIBS= 
 EX_LIBS= -ldl
@@ -75,7 +75,7 @@ TARFLAGS= --no-recursion
 MAKEDEPPROG= gcc
 
 # Set BN_ASM to bn_asm.o if you want to use the C version
-BN_ASM= asm/bn86-elf.o asm/co86-elf.o
+BN_ASM= asm/x86_64-gcc.o
 #BN_ASM= bn_asm.o
 #BN_ASM= asm/bn86-elf.o	# elf, linux-elf
 #BN_ASM= asm/bn86-sol.o # solaris
@@ -95,7 +95,7 @@ PROCESSOR=
 
 # Set DES_ENC to des_enc.o if you want to use the C version
 #There are 4 x86 assember options.
-DES_ENC= asm/dx86-elf.o asm/yx86-elf.o
+DES_ENC= des_enc.o fcrypt_b.o
 #DES_ENC= des_enc.o fcrypt_b.o          # C
 #DES_ENC= asm/dx86-elf.o asm/yx86-elf.o # elf
 #DES_ENC= asm/dx86-sol.o asm/yx86-sol.o # solaris
@@ -104,7 +104,7 @@ DES_ENC= asm/dx86-elf.o asm/yx86-elf.o
 
 # Set BF_ENC to bf_enc.o if you want to use the C version
 #There are 4 x86 assember options.
-BF_ENC= asm/bx86-elf.o
+BF_ENC= bf_enc.o
 #BF_ENC= bf_enc.o
 #BF_ENC= asm/bx86-elf.o # elf
 #BF_ENC= asm/bx86-sol.o # solaris
@@ -113,7 +113,7 @@ BF_ENC= asm/bx86-elf.o
 
 # Set CAST_ENC to c_enc.o if you want to use the C version
 #There are 4 x86 assember options.
-CAST_ENC= asm/cx86-elf.o
+CAST_ENC= c_enc.o
 #CAST_ENC= c_enc.o
 #CAST_ENC= asm/cx86-elf.o # elf
 #CAST_ENC= asm/cx86-sol.o # solaris
@@ -122,7 +122,7 @@ CAST_ENC= asm/cx86-elf.o
 
 # Set RC4_ENC to rc4_enc.o if you want to use the C version
 #There are 4 x86 assember options.
-RC4_ENC= asm/rx86-elf.o
+RC4_ENC= rc4_enc.o
 #RC4_ENC= rc4_enc.o
 #RC4_ENC= asm/rx86-elf.o # elf
 #RC4_ENC= asm/rx86-sol.o # solaris
@@ -131,7 +131,7 @@ RC4_ENC= asm/rx86-elf.o
 
 # Set RC5_ENC to rc5_enc.o if you want to use the C version
 #There are 4 x86 assember options.
-RC5_ENC= asm/r586-elf.o
+RC5_ENC= rc5_enc.o
 #RC5_ENC= rc5_enc.o
 #RC5_ENC= asm/r586-elf.o # elf
 #RC5_ENC= asm/r586-sol.o # solaris
@@ -139,21 +139,21 @@ RC5_ENC= asm/r586-elf.o
 #RC5_ENC= asm/r586bsdi.o # bsdi
 
 # Also need MD5_ASM defined
-MD5_ASM_OBJ= asm/mx86-elf.o
+MD5_ASM_OBJ= 
 #MD5_ASM_OBJ= asm/mx86-elf.o        # elf
 #MD5_ASM_OBJ= asm/mx86-sol.o        # solaris
 #MD5_ASM_OBJ= asm/mx86-out.o        # a.out, FreeBSD
 #MD5_ASM_OBJ= asm/mx86bsdi.o        # bsdi
 
 # Also need SHA1_ASM defined
-SHA1_ASM_OBJ= asm/sx86-elf.o
+SHA1_ASM_OBJ= 
 #SHA1_ASM_OBJ= asm/sx86-elf.o       # elf
 #SHA1_ASM_OBJ= asm/sx86-sol.o       # solaris
 #SHA1_ASM_OBJ= asm/sx86-out.o       # a.out, FreeBSD
 #SHA1_ASM_OBJ= asm/sx86bsdi.o       # bsdi
 
 # Also need RMD160_ASM defined
-RMD160_ASM_OBJ= asm/rm86-elf.o
+RMD160_ASM_OBJ= 
 #RMD160_ASM_OBJ= asm/rm86-elf.o       # elf
 #RMD160_ASM_OBJ= asm/rm86-sol.o       # solaris
 #RMD160_ASM_OBJ= asm/rm86-out.o       # a.out, FreeBSD
@@ -198,7 +198,7 @@ SHARED_CRYPTO=libcrypto$(SHLIB_EXT)
 SHARED_SSL=libssl$(SHLIB_EXT)
 SHARED_LIBS=
 SHARED_LIBS_LINK_EXTS=.so.$(SHLIB_MAJOR) .so
-SHARED_LDFLAGS=
+SHARED_LDFLAGS=-m64
 
 GENERAL=        Makefile
 BASENAME=       openssl
