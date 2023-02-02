@@ -446,7 +446,6 @@ extern "C" void QTNewDataReferenceFromFullPathCFString();
 extern "C" void QTNewGWorldFromPtr();
 extern "C" void QuitAppModalLoopForWindow();
 extern "C" void QuitApplicationEventLoop();
-extern "C" void RAND_seed();
 extern "C" void RGBBackColor();
 extern "C" void RGBForeColor();
 extern "C" void ReadLocation();
@@ -551,6 +550,7 @@ extern "C" void X509_get_issuer_name();
 extern "C" void X509_get_subject_name();
 extern "C" void X509_verify_cert_error_string();
 extern "C" void YieldToAnyThread();*/
+extern "C" void RAND_seed();
 extern "C" void _Unwind_Resume();
 extern "C" void _ZN9__gnu_cxx12__atomic_addEPVii();
 extern "C" void _ZN9__gnu_cxx18__exchange_and_addEPVii();

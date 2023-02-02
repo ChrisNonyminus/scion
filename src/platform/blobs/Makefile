@@ -2,7 +2,7 @@ TARGET_GAME ?= sims2
 
 SHELL := bash
 
-CC := i686-linux-gnu-g++-12
+CC := g++ -m32 -march=i686
 LD := i686-linux-gnu-ld
 
 FRAMEWORK_SRC = framework/src
@@ -63,10 +63,10 @@ CXXFLAGS += -ggdb -fsanitize=address -fno-omit-frame-pointer
 
 all: $(TARGET_GAME)
 build/macho-loader/libmac/%.o: macho-loader/libmac/%.c
-	ccache i686-linux-gnu-gcc-12 -Imacho-loader/include -m32 $(CFLAGS) -c $< -o $@
+	ccache gcc -m32 -march=i686 -Imacho-loader/include -m32 $(CFLAGS) -c $< -o $@
 
 libmac.so: build/macho-loader/libmac/mac.o build/macho-loader/libmac/strmode.o
-	i686-linux-gnu-gcc-12 -m32 -shared $^ -O -fPIC -o $@ -luuid -lz
+	gcc -m32 -march=i686 -m32 -shared $^ -O -fPIC -o $@ -luuid -lz
 clean:
 	rm -rf build
 	rm -f $(TARGET_GAME)
@@ -85,7 +85,7 @@ build:
 
 dxvk-native:
 ifeq ($(wildcard ./dxvk-native-master/.),)
-	$(shell CC=i686-linux-gnu-gcc-12 CXX=i686-linux-gnu-g++-12  ./dxvk/package-native.sh master ./ --no-package --dev-build)
+	$(shell CC=gcc -m32 -march=i686 CXX=i686-linux-gnu-g++-12  ./dxvk/package-native.sh master ./ --no-package --dev-build)
 endif
 
 openssl-0.9.7:

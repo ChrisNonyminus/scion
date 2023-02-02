@@ -446,7 +446,6 @@ hook_function(_QTNewDataReferenceFromFullPathCFString_ADDR, CAST_CPP_FUNCPTR(QTN
 hook_function(_QTNewGWorldFromPtr_ADDR, CAST_CPP_FUNCPTR(QTNewGWorldFromPtr));
 hook_function(_QuitAppModalLoopForWindow_ADDR, CAST_CPP_FUNCPTR(QuitAppModalLoopForWindow));
 hook_function(_QuitApplicationEventLoop_ADDR, CAST_CPP_FUNCPTR(QuitApplicationEventLoop));
-hook_function(_RAND_seed_ADDR, CAST_CPP_FUNCPTR(RAND_seed));
 hook_function(_RGBBackColor_ADDR, CAST_CPP_FUNCPTR(RGBBackColor));
 hook_function(_RGBForeColor_ADDR, CAST_CPP_FUNCPTR(RGBForeColor));
 hook_function(_ReadLocation_ADDR, CAST_CPP_FUNCPTR(ReadLocation));
@@ -460,9 +459,6 @@ hook_function(_RepositionWindow_ADDR, CAST_CPP_FUNCPTR(RepositionWindow));
 hook_function(_RunAppModalLoopForWindow_ADDR, CAST_CPP_FUNCPTR(RunAppModalLoopForWindow));
 hook_function(_RunApplicationEventLoop_ADDR, CAST_CPP_FUNCPTR(RunApplicationEventLoop));
 hook_function(_RunStandardAlert_ADDR, CAST_CPP_FUNCPTR(RunStandardAlert));
-hook_function(_SSLv23_client_method_ADDR, CAST_CPP_FUNCPTR(SSLv23_client_method));
-hook_function(_SSLv23_method_ADDR, CAST_CPP_FUNCPTR(SSLv23_method));
-hook_function(_SSLv23_server_method_ADDR, CAST_CPP_FUNCPTR(SSLv23_server_method));
 hook_function(_SameProcess_ADDR, CAST_CPP_FUNCPTR(SameProcess));
 hook_function(_ScaleMatrix_ADDR, CAST_CPP_FUNCPTR(ScaleMatrix));
 hook_function(_SecondsToDate_ADDR, CAST_CPP_FUNCPTR(SecondsToDate));
@@ -554,6 +550,10 @@ hook_function(_X509_get_issuer_name_ADDR, CAST_CPP_FUNCPTR(X509_get_issuer_name)
 hook_function(_X509_get_subject_name_ADDR, CAST_CPP_FUNCPTR(X509_get_subject_name));
 hook_function(_X509_verify_cert_error_string_ADDR, CAST_CPP_FUNCPTR(X509_verify_cert_error_string));
 hook_function(_YieldToAnyThread_ADDR, CAST_CPP_FUNCPTR(YieldToAnyThread));*/
+hook_function(_SSLv23_client_method_ADDR, CAST_CPP_FUNCPTR(SSLv23_client_method));
+hook_function(_SSLv23_method_ADDR, CAST_CPP_FUNCPTR(SSLv23_method));
+hook_function(_SSLv23_server_method_ADDR, CAST_CPP_FUNCPTR(SSLv23_server_method));
+hook_function(_RAND_seed_ADDR, CAST_CPP_FUNCPTR(RAND_seed));
 hook_function(_Gestalt_ADDR, CAST_CPP_FUNCPTR(Gestalt));
 hook_function(_Microseconds_ADDR, CAST_CPP_FUNCPTR(Microseconds));
 hook_function(__Unwind_Resume_ADDR, CAST_CPP_FUNCPTR(_Unwind_Resume));

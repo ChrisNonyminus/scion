@@ -553,18 +553,9 @@ HANDLE FindFirstFileW(
     /*out*/ WIN32_FIND_DATAW *lpFindFileData // pointer to information about a
     // found file/directory
 ) {
-  char szFileName[1024];
-  wchar_t wcsFixed[1024];
-  /*if (const wchar_t* str = wcsstr(lpFileName, L"/EA Games/The Sims 2")) {
-    mbstowcs(wcsFixed, getenv("HOME"), strlen(getenv("HOME")));
-    wcscat(wcsFixed, L"/Documents/");
-    wcscat(wcsFixed, lpFileName);
-  }
-  else {*/
-  wcscpy(wcsFixed, lpFileName);
-  //}
-  wcstombs(szFileName, wcsFixed, wcslen(wcsFixed) + 1);
-  szFileName[wcslen(wcsFixed)] = '\0';
+  char szFileName[512];
+  wcstombs(szFileName, lpFileName, wcslen(lpFileName) + 1);
+  szFileName[wcslen(lpFileName)] = '\0';
   WIN32_FIND_DATA tmp;
   HANDLE hndl = FindFirstFileA(szFileName, &tmp);
   if (hndl != NULL) {
