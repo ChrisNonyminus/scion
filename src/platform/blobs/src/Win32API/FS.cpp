@@ -20,7 +20,10 @@ const char *DOSPathToUnixPath(const char *szDosPath) {
     }
   }
   szUnixPath[strlen(szUnixPath)] = '\0';
-  return szUnixPath;
+  if (strstr(szUnixPath,"C:")) {
+    return strdup(szUnixPath + 2);
+  }
+  return strdup(szUnixPath);
 }
 
 std::string fixPath(std::string str)
@@ -763,3 +766,60 @@ DWORD SetFilePointer(HANDLE hFile,
   fseek(fp, lDistanceToMove, seek_type);
   return ftell(fp);
 }
+
+void __Z9SplitpathPKcPcS1_S1_S1_(char* path, char* drive, char* dir, char* fname, char* ext) {
+  if (!path) return;
+  path = (char*)DOSPathToUnixPath(path);
+
+  printf("Splitting: %s\n", path);
+  if (drive) {
+    strcpy(drive, "/./");
+    printf("Drive is: %s\n", drive);
+  }
+
+  if (dir) {
+    char tmp[1024];
+    strcpy(tmp, path);
+    char* tmp2 = strrchr(tmp, '/');
+    if (tmp2) {
+      *(tmp2+1) = 0;
+    }
+    strcpy(dir, tmp);
+    printf("Dir is: %s\n", dir);
+  }
+
+  if (fname) {
+
+    char tmp[1024];
+    strcpy(tmp, path);
+    char* tmp2 = strrchr(tmp, '/');
+    char* tmp3 = strchr(tmp2 ? tmp2 : tmp, '.');
+    if (tmp3) {
+      *tmp3 = 0;
+    }
+    if (tmp2) {
+      strcpy(fname, tmp2+1);
+    }
+    else {
+      strcpy(fname, "");
+    }
+
+    printf("Fname is: %s\n", fname);
+  }
+
+  if (ext) {
+    char tmp[1024];
+    strcpy(tmp, path);
+    char* tmp2 = strrchr(tmp, '/');
+    char* tmp3 = strchr(tmp2 ? tmp2 : tmp, '.');
+    if (tmp3) {
+      strcpy(ext, tmp3);
+    }
+    else {
+      strcpy(ext, "");
+    }
+
+    printf("Ext is: %s\n", ext);
+  }
+}
+

@@ -22,6 +22,8 @@ DECL_EXTERN_C_FUNC(_Z25ProcessSignatureIsRunningj, 0x005B36BA)
 #include "Win32API/DirectX/Direct3D.h"
 #include "Win32API/Input.h"
 
+#include "ld-mac.hh"
+
 cRZFileAPIW32::cRZFileAPIW32() {
 
 }
@@ -131,4 +133,6 @@ void DoRZWinAPIHooks() {
 #ifdef TARGET_GAME_sims2
 //#include "../The Sims 2 Bon Voyage~.x86_winapi_hooks.txt"
 #endif
+  hook_function(gMachO->GetSymbolAddr("__Z9SplitpathPKcPcS1_S1_S1_"),
+                CAST_CPP_FUNCPTR(__Z9SplitpathPKcPcS1_S1_S1_));
 }

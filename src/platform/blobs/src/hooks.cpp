@@ -387,8 +387,8 @@ void _ZN20cSC4RenderPropertiesC1Ev(); // cSC4RenderProperties constructor (imple
 
 }
 
-bool THREAD_setup() {
-  return false; // STUB/TODO
+int THREAD_setup() {
+  return 0; // STUB/TODO
 }
 
 #include <stdio.h>
@@ -874,7 +874,8 @@ void do_hooks() {
   HOOK_FUNC(_ZN31TryLockFunctionEntryPointFinderC2Ev)
   HOOK_FUNC(stat)
   HOOK_FUNC(atexit)
-  HOOK_FUNC(THREAD_setup)
+  hook_function(gMachO->GetSymbolAddr("__Z12THREAD_setupv"), CAST_CPP_FUNCPTR
+  (THREAD_setup));
 
   DoASLHooks();
   DoRZWinAPIHooks();

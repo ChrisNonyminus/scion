@@ -144,6 +144,10 @@ bool SetEndOfFile(
     /*in*/ HANDLE hFile
 );
 
+
 };
+extern "C"
+void __Z9SplitpathPKcPcS1_S1_S1_(char* path, char* drive, char* dir, char*
+fname, char* ext);
 
 #endif //BLOBS_SRC_WIN32API_FS_H

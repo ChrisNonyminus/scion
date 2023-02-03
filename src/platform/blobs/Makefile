@@ -2,7 +2,8 @@ TARGET_GAME ?= sims2
 
 SHELL := bash
 
-CC := g++ -m32 -march=i686
+CC := gcc-12 -m32 -march=i686
+CXX := g++-12 -m32 -march=i686
 LD := i686-linux-gnu-ld
 
 FRAMEWORK_SRC = framework/src
@@ -52,13 +53,13 @@ mac-headers:
 	done
 
 
-CFLAGS := -I$(GAME_INC) -I$(FRAMEWORK_INC) -I$(PLATFORM_INC) -O0 -g -std=c++03  -DTARGET_GAME_${TARGET_GAME} -Wall
+CFLAGS := -I$(GAME_INC) -I$(FRAMEWORK_INC) -I$(PLATFORM_INC) -O0 -g -std=c++98  -DTARGET_GAME_${TARGET_GAME} -Wall
 MAC_CFLAGS :=  -Wno-multichar -Isrc/MacFrameworks/MacOSX10.4u.sdk/Developer/Headers/CFMCarbon -Ibuild/src/MacFrameworks -Ibuild/src -Imacho-loader/include -Imacho-loader
 
 CXXFLAGS = $(CFLAGS)
 CXXFLAGS += $(MAC_CFLAGS)  -Wno-unknown-pragmas -Idxvk-native/include -Idxvk-native/include -Idxvk-native/include/native  -Idxvk-native/include/native/windows  -Idxvk-native/include/native/directx -Ithird_party/openssl-0.9.7/include
 CXXFLAGS += -D_GLIBCXX_USE_CXX11_ABI=0 -fabi-version=2
-CXXFLAGS += -ggdb -fsanitize=address -fno-omit-frame-pointer
+CXXFLAGS += # -ggdb -fsanitize=address -fno-omit-frame-pointer
 
 
 all: $(TARGET_GAME)
@@ -66,7 +67,7 @@ build/macho-loader/libmac/%.o: macho-loader/libmac/%.c
 	ccache gcc -m32 -march=i686 -Imacho-loader/include -m32 $(CFLAGS) -c $< -o $@
 
 libmac.so: build/macho-loader/libmac/mac.o build/macho-loader/libmac/strmode.o
-	gcc -m32 -march=i686 -m32 -shared $^ -O -fPIC -o $@ -luuid -lz
+	gcc -m32 -march=i686 -m32 -shared $^ -O -o $@ -luuid -lz
 clean:
 	rm -rf build
 	rm -f $(TARGET_GAME)
@@ -92,11 +93,11 @@ openssl-0.9.7:
 	cd third_party/openssl-0.9.7 && $(MAKE)
 
 build/%.o: %.cpp mac-headers
-	ccache $(CC) -m32 $(CXXFLAGS) -c $< -o $@
+	ccache $(CXX) -m32 $(CXXFLAGS) -c $< -o $@
 
 
 build/%.o: %.cc
-	ccache $(CC) -m32 $(CXXFLAGS) -c $< -o $@
+	ccache $(CXX) -m32 $(CXXFLAGS) -c $< -o $@
 
 check-env:
 ifndef TARGET_GAME
@@ -106,7 +107,7 @@ endif
 
 $(TARGET_GAME): check-env build dxvk-native openssl-0.9.7 $(ALL_OBJECTS) libmac.so
 	cp dxvk-native-master/usr/lib32/libdxvk_d3d9.so .
-	$(CC) -m32 -g -o $@ -T $(TARGET_GAME).ld -Wl,-Map,build/$@.map -fabi-version=2 $(ALL_OBJECTS) -std=c++98 -l:libboost_system.a -l:libboost_filesystem.a -L/usr/local/i386-linux-gnu/lib -llua -llualib `sdl2-config --libs` -lGL -ldl   -L. -ldxvk_d3d9 -l:third_party/openssl-0.9.7/libssl.a -l:third_party/openssl-0.9.7/libcrypto.a -lvulkan  -ggdb -fsanitize=address -fno-omit-frame-pointer -static-libasan -lrt
+	$(CXX) -m32 -g -o $@ -T $(TARGET_GAME).ld -Wl,-Map,build/$@.map -fabi-version=2 $(ALL_OBJECTS) -std=c++98 -l:libboost_system.a -l:libboost_filesystem.a -L/usr/local/i386-linux-gnu/lib -llua -llualib `sdl2-config --libs` -lGL -ldl   -L. -ldxvk_d3d9 -l:third_party/openssl-0.9.7/libssl.a -l:third_party/openssl-0.9.7/libcrypto.a -lvulkan # -ggdb -fsanitize=address -fno-omit-frame-pointer -static-libasan -lrt
 
 
 
