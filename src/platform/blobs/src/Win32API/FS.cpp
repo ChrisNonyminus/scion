@@ -564,7 +564,9 @@ HANDLE FindFirstFileW(
   if (hndl != NULL) {
 
     memcpy(lpFindFileData, &tmp, sizeof(tmp) - 260);
-    mbstowcs(lpFindFileData->cFileName, tmp.cFileName, strlen(tmp.cFileName));
+    mbstowcs(lpFindFileData->cFileName, tmp.cFileName, mbstowcs(NULL, tmp
+    .cFileName, 0));
+    lpFindFileData->cFileName[strlen(tmp.cFileName)] = L'\0';
   }
   return hndl;
 }
@@ -577,7 +579,9 @@ bool FindNextFileW(
   bool succ = FindNextFileA(hFindFile, &tmp);
   if (!succ) return false;
   memcpy(lpFindFileData, &tmp, sizeof(tmp) - 260);
-  mbstowcs(lpFindFileData->cFileName, tmp.cFileName, strlen(tmp.cFileName));
+  mbstowcs(lpFindFileData->cFileName, tmp.cFileName, mbstowcs(NULL, tmp
+      .cFileName, 0));
+  lpFindFileData->cFileName[strlen(tmp.cFileName)] = L'\0';
   return true;
 
 }
@@ -719,7 +723,7 @@ uint32_t SHGetFolderPathW(
 ) {
   char path[1024];
   uint32_t ret = SHGetFolderPathA(hwnd, csidl, hToken, dwFlags, path);
-  mbstowcs(pszPath, path, strlen(path));
+  mbstowcs(pszPath, path, mbstowcs(NULL, path, 0));
   pszPath[strlen(path) + 1] = L'\0';
   return ret;
 }
@@ -770,6 +774,13 @@ DWORD SetFilePointer(HANDLE hFile,
 void __Z9SplitpathPKcPcS1_S1_S1_(char* path, char* drive, char* dir, char* fname, char* ext) {
   if (!path) return;
   path = (char*)DOSPathToUnixPath(path);
+
+  std::string spath(path);
+  if (spath.find("StuffPack") != std::string::npos) {
+    // HACK: game starts losing its shit and looking for subfolders in StuffPack
+    // with an egregious amount of chinese characters, let's avoid that
+    return;
+  }
 
   printf("Splitting: %s\n", path);
   if (drive) {

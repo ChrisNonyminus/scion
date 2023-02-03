@@ -72,9 +72,9 @@ bool RemoveDirectoryW(
 );
 struct WIN32_FIND_DATA {
   uint32_t dwFileAttributes;
-  uint32_t ftCreationTime;
-  uint32_t ftLastAccessTime;
-  uint32_t ftLastWriteTime;
+  uint64_t ftCreationTime;
+  uint64_t ftLastAccessTime;
+  uint64_t ftLastWriteTime;
   uint32_t nFileSizeHigh;
   uint32_t nFileSizeLow;
   uint32_t dwReserved0;
@@ -83,9 +83,9 @@ struct WIN32_FIND_DATA {
 };
 struct WIN32_FIND_DATAW {
   uint32_t dwFileAttributes;
-  uint32_t ftCreationTime;
-  uint32_t ftLastAccessTime;
-  uint32_t ftLastWriteTime;
+  uint64_t ftCreationTime;
+  uint64_t ftLastAccessTime;
+  uint64_t ftLastWriteTime;
   uint32_t nFileSizeHigh;
   uint32_t nFileSizeLow;
   uint32_t dwReserved0;

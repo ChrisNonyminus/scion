@@ -104,6 +104,7 @@ enum Sims2Apps {
 
 // Initialize the registry keys the game uses. Don't use a registry file.
 void Win32API::InitRegistry() {
+
 #ifdef TARGET_GAME_sims2
   static const char *mAppPathsKey =
       "Software\\Microsoft\\Windows\\CurrentVersion\\App Paths\\";
@@ -168,7 +169,7 @@ void Win32API::InitRegistry() {
 
     keyList.defaultKey = newKey;
     keyList.defaultKey.name = "";
-    keyList.defaultKey.value = path + mAppNames[i];
+    keyList.defaultKey.value = path + "TSBin\\" + mAppNames[i];
     keyList.defaultKey.type = 1;
 
   }
@@ -209,7 +210,28 @@ void Win32API::InitRegistry() {
   newKey.type = 1;
   keyList.keys.push_back(newKey);
 
+  newKey.name = "Install Dir";
+  newKey.value += "Double Deluxe\\Base\\";
+  newKey.type = 1;
+  keyList.keys.push_back(newKey);
+
+
+
 #endif
+
+  key = "HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0";
+  if (gRegistry.find(key) == gRegistry.end()) {
+    gRegistry[key] = RegistryKeyList();
+  }
+  RegistryKeyList &keyList2 = GetRegistryKeyList(key.c_str());
+
+  RegistryKey cpuKey;
+  cpuKey.type = 4;
+  cpuKey.name = "~MHz";
+  cpuKey.value = "2000";
+  keyList2.keys.push_back(cpuKey);
+
+
 }
 
 int RegOpenKeyExA(void *hKey,
