@@ -173,23 +173,7 @@ bool ReadFile(HANDLE hFile,
     filename[len] = '\0';
     printf("[Win32API::FS, DEBUG] Reading from file \"%s\"...\n", filename);
   }
-  DWORD maxsize = GetFileSize(hFile, NULL);
-  uint32_t remaining = nNumberOfBytesToRead;
-  if (remaining > maxsize) {
-    remaining = maxsize;
-  }
-  uint8_t* buf = static_cast<uint8_t *>(lpBuffer);
-  while (remaining > 0) {
-    if (remaining > 8192) {
-      *lpNumberOfBytesRead += fread(buf, 1, 8192, fp);
-      remaining -= 8192;
-      buf += 8192;
-    } else {
-      *lpNumberOfBytesRead += fread(buf, 1, remaining, fp);
-      buf += remaining;
-      remaining = 0;
-    }
-  }
+  *lpNumberOfBytesRead = fread(lpBuffer, 1, nNumberOfBytesToRead, fp);
   return true;
 }
 bool WriteFile(HANDLE hFile,
@@ -332,16 +316,6 @@ HANDLE FindFirstFileA(
   /*std::transform(szRealFileName.begin(), szRealFileName.end(), szRealFileName.begin(), tolower);*/
   std::string parent_path = (szRealFileName.substr(0, szRealFileName
       .find_last_of("/")));
-  if (!boost::filesystem::exists(szRealFileName) && szRealFileName.find("*"
-  ) == std::string::npos) {
-    // get outta here, something's wrong with the filename
-    FindResult *pResult = new FindResult;
-    pResult->it = NULL;
-    pResult->dir = NULL;
-    pResult->szWildcard = NULL;
-    HANDLE handle = HANDLE_Create(Handle_FindFile, pResult);
-    return handle;
-  }
   if (!boost::filesystem::exists(bSearchAllFiles ? szRealFileName : parent_path)) {
     printf("[Win32API::FS] Failed to resolve file search query, folder does "
            "not exist. \"%s\".\n",
@@ -561,7 +535,7 @@ HANDLE FindFirstFileW(
   szFileName[wcslen(lpFileName)] = '\0';
   WIN32_FIND_DATA tmp;
   HANDLE hndl = FindFirstFileA(szFileName, &tmp);
-  if (hndl != NULL) {
+  if (hndl != NULL && hndl->ptr != NULL) {
 
     memcpy(lpFindFileData, &tmp, sizeof(tmp) - 260);
     mbstowcs(lpFindFileData->cFileName, tmp.cFileName, mbstowcs(NULL, tmp
@@ -758,7 +732,8 @@ DWORD SetFilePointer(HANDLE hFile,
   if (fp == NULL) {
     return -1;
   }
-  if (lpDistanceToMoveHigh != NULL) return -1; // I don't know what to do
+  if (lpDistanceToMoveHigh != NULL)
+    return -1; // I don't know what to do
   // with >2GB files
   int seek_type = 0;
   switch (dwMoveMethod) {
@@ -776,11 +751,11 @@ void __Z9SplitpathPKcPcS1_S1_S1_(char* path, char* drive, char* dir, char* fname
   path = (char*)DOSPathToUnixPath(path);
 
   std::string spath(path);
-  if (spath.find("StuffPack") != std::string::npos) {
+  /*if (spath.find("StuffPack") != std::string::npos) {
     // HACK: game starts losing its shit and looking for subfolders in StuffPack
     // with an egregious amount of chinese characters, let's avoid that
     return;
-  }
+  }*/
 
   printf("Splitting: %s\n", path);
   if (drive) {

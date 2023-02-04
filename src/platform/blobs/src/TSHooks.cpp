@@ -28,9 +28,9 @@ void HookSims2Functions() {
   /*hook_function(gMachO->GetSymbolAddr("__ZN16cTSWinCalloutBox12RecalcLayoutEv"),
                 CAST_CPP_FUNCPTR(__ZN16cTSWinCalloutBox12RecalcLayoutEv));*/
 
-  /*hook_function(gMachO->GetSymbolAddr
+  hook_function(gMachO->GetSymbolAddr
   ("__ZN16cTSPersistSystem25OpenResourcesInBackgroundEv"), CAST_CPP_FUNCPTR
-  (_ZN16cTSPersistSystem25OpenResourcesInBackgroundEv));*/
+  (_ZN16cTSPersistSystem25OpenResourcesInBackgroundEv));
 }
 bool HackyFunctionToCheckIfResourcesAreAllLoaded() {
   return false;

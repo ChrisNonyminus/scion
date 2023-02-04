@@ -104,8 +104,12 @@ SDL_Window *GetActiveWindow();
 
 SDL_Window *SetActiveWindow(SDL_Window* hwnd);
 
+bool SetWindowTextA(SDL_Window* hwnd, const char* str);
+
 // Temporary
 extern int (*__ZN11nGZGraphic410cCanvasW3210WindowProcEP6HWND__jjl)
 (SDL_Window* hWnd, uint32_t uMsg, uint32_t wParam, int32_t lParam);
+extern int (*__ZN11nGZGraphic410cCanvasW327OnPaintEP6HWND__)(void* windowlong,
+    SDL_Window* hWnd);
 
 #endif //BLOBS_SRC_WIN32API_WINDOWING_H

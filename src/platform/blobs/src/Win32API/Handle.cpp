@@ -16,6 +16,7 @@ bool CloseHandle(HANDLE hToClose) {
   switch (hToClose->type) {
   case Handle_FindFile: {
     FindClose(hToClose);
+    break;
   }
   case Handle_FileHandle: {
     if (hToClose->ptr != NULL)

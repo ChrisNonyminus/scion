@@ -183,7 +183,7 @@ void Win32API::InitRegistry() {
 
   newKey.name = "CacheSize";
   newKey.value = "4735180800";
-  newKey.type = 4;
+  newKey.type = 1;
   keyList.keys.push_back(newKey);
 
   newKey.name = "CD Drive";

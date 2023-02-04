@@ -53,6 +53,8 @@ extern "C" void _ZN10cRZVersion15GetSystemMemoryERjS0_();
 
 int (*__ZN11nGZGraphic410cCanvasW3210WindowProcEP6HWND__jjl)
     (SDL_Window* hWnd, uint32_t uMsg, uint32_t wParam, int32_t lParam);
+int (*__ZN11nGZGraphic410cCanvasW327OnPaintEP6HWND__)(void* windowlong,
+                                                      SDL_Window* hWnd);
 
 // TODO: tmp stub
 int __ZN22nsGZLua5CompatWithLua47OpenLibEP8cIGZLua5() {
@@ -160,6 +162,10 @@ void HookGZFrameFunctions() {
                                int32_t)>(gMachO->GetSymbolAddr(
           "__ZN11nGZGraphic410cCanvasW3210WindowProcEP6HWND__jjl"));
 
+  __ZN11nGZGraphic410cCanvasW327OnPaintEP6HWND__ =
+      reinterpret_cast<int (*)(void *, SDL_Window *)>(gMachO->GetSymbolAddr
+          ("__ZN11nGZGraphic410cCanvasW327OnPaintEP6HWND__"));
+
   HOOK_FUNC(_Z10IsFullPathPKc)
   //HOOK_FUNC(_ZN9cRZStringC2ERKS_jj)
   HOOK_FUNC(GetTimebase)
@@ -184,8 +190,8 @@ void HookGZFrameFunctions() {
   ("__ZN7cRZTime24GetMillisecondSystemTimeEv"), CAST_CPP_FUNCPTR
   (__ZN7cRZTime24GetMillisecondSystemTimeEv));
 
-  hook_function(gMachO->GetSymbolAddr("__ZN15cRZThreadSignal9TimedWaitEm"),
-                CAST_CPP_FUNCPTR(__ZN15cRZThreadSignal9TimedWaitEm));
+  /*hook_function(gMachO->GetSymbolAddr("__ZN15cRZThreadSignal9TimedWaitEm"),
+                CAST_CPP_FUNCPTR(__ZN15cRZThreadSignal9TimedWaitEm));*/
 
   /*hook_function(gMachO->GetSymbolAddr
   ("__Z21ConvertStringEncodingPKvmlR10cIGZString"), CAST_CPP_FUNCPTR

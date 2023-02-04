@@ -53,13 +53,13 @@ mac-headers:
 	done
 
 
-CFLAGS := -I$(GAME_INC) -I$(FRAMEWORK_INC) -I$(PLATFORM_INC) -O0 -g -std=c++98  -DTARGET_GAME_${TARGET_GAME} -Wall
+CFLAGS := -I$(GAME_INC) -I$(FRAMEWORK_INC) -I$(PLATFORM_INC) -O1 -g -std=c++98  -DTARGET_GAME_${TARGET_GAME} -Wall
 MAC_CFLAGS :=  -Wno-multichar -Isrc/MacFrameworks/MacOSX10.4u.sdk/Developer/Headers/CFMCarbon -Ibuild/src/MacFrameworks -Ibuild/src -Imacho-loader/include -Imacho-loader
 
 CXXFLAGS = $(CFLAGS)
 CXXFLAGS += $(MAC_CFLAGS)  -Wno-unknown-pragmas -Idxvk-native/include -Idxvk-native/include -Idxvk-native/include/native  -Idxvk-native/include/native/windows  -Idxvk-native/include/native/directx -Ithird_party/openssl-0.9.7/include
 CXXFLAGS += -D_GLIBCXX_USE_CXX11_ABI=0 -fabi-version=2
-CXXFLAGS += # -ggdb -fsanitize=address -fno-omit-frame-pointer
+CXXFLAGS += -ggdb -fsanitize=address -fno-omit-frame-pointer
 
 
 all: $(TARGET_GAME)
@@ -107,7 +107,7 @@ endif
 
 $(TARGET_GAME): check-env build dxvk-native openssl-0.9.7 $(ALL_OBJECTS) libmac.so
 	cp dxvk-native-master/usr/lib32/libdxvk_d3d9.so .
-	$(CXX) -m32 -g -o $@ -T $(TARGET_GAME).ld -Wl,-Map,build/$@.map -fabi-version=2 $(ALL_OBJECTS) -std=c++98 -l:libboost_system.a -l:libboost_filesystem.a -L/usr/local/i386-linux-gnu/lib -llua -llualib `sdl2-config --libs` -lGL -ldl   -L. -ldxvk_d3d9 -l:third_party/openssl-0.9.7/libssl.a -l:third_party/openssl-0.9.7/libcrypto.a -lvulkan # -ggdb -fsanitize=address -fno-omit-frame-pointer -static-libasan -lrt
+	$(CXX) -m32 -g -o $@ -T $(TARGET_GAME).ld -Wl,-Map,build/$@.map -fabi-version=2 $(ALL_OBJECTS) -std=c++98 -l:libboost_system.a -l:libboost_filesystem.a -L/usr/local/i386-linux-gnu/lib -llua -llualib `sdl2-config --libs` -lGL -ldl   -L. -ldxvk_d3d9 -l:third_party/openssl-0.9.7/libssl.a -l:third_party/openssl-0.9.7/libcrypto.a -lvulkan -ggdb -fsanitize=address -fno-omit-frame-pointer -static-libasan -lrt
 
 
 

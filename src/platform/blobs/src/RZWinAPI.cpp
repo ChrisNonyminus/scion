@@ -124,6 +124,7 @@ void DoRZWinAPIHooks() {
   HOOK_FUNC(GetWindowLongA)
   HOOK_FUNC(SetWindowLongA)
   HOOK_FUNC(GetActiveWindow)
+  HOOK_FUNC(SetWindowTextA)
 
   HOOK_FUNC(GetTickCount)
   HOOK_FUNC(timeGetTime)

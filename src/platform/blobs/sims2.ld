@@ -24,6 +24,8 @@ _ZN16cTSPersistSystem18ForceOpenResourcesEPv = 0x007D06BC;
 
 sLastError = 0x00032A37;
 
+_ZN9cRZThread13SetThreadNameEPc = 0x005336F4;
+
 SECTIONS
 {
     . = 0x04000000;

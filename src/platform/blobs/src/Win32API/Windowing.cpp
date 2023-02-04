@@ -4,6 +4,12 @@
 
 extern SDL_Window* gMainHWND;
 
+extern "C" uint32_t OnPaintCallback(uint32_t interval, void* param) {;
+  __ZN11nGZGraphic410cCanvasW327OnPaintEP6HWND__(GetWindowLongA
+                                                     (GetActiveWindow(), -21), GetActiveWindow());
+  return 16;
+}
+
 void *CreateWindowExA(uint32_t dwExStyle,
                       const char *lpClassName,
                       const char *lpWindowName,
@@ -27,6 +33,7 @@ void *CreateWindowExA(uint32_t dwExStyle,
 
   SDL_HideWindow(mSDLWindow);
   gMainHWND = mSDLWindow;
+  SDL_AddTimer(16, OnPaintCallback, NULL);
   return mSDLWindow;
 
 }
@@ -57,7 +64,7 @@ bool UpdateWindow(
     wind = (SDL_Window *) hWnd;
   if (wind == NULL)
     return false;
-  SDL_UpdateWindowSurface(wind);
+  //SDL_UpdateWindowSurface(wind);
 
   //SDL_GL_SwapWindow(wind);
   return true;
@@ -119,14 +126,7 @@ bool PeekMessageA(LPMSG lpMsg,
                   uint32_t wMsgFilterMax,
                   uint32_t wRemoveMsg) {
   lpMsg->hwnd = hWnd;
-  static float millisecondsAtLastPaintCall = time(NULL) * 1000;
-  float millisecondsNow = time(NULL) * 1000;
-  if ((millisecondsNow - millisecondsAtLastPaintCall) >= 16) {
-    lpMsg->message = 15; // WM_PAINT
-    // todo
-    millisecondsAtLastPaintCall = millisecondsNow;
-    return true;
-  }
+
   static bool wereIn = false;
   if (!wereIn) {
     // *hacker voice* we're in
@@ -253,7 +253,7 @@ bool PostMessageA(
   SDL_PushEvent(&event);
   return true;
 }
-static __thread SDL_Window* activeWindow;
+static SDL_Window* activeWindow;
 SDL_Window *SetActiveWindow(SDL_Window *hwnd) {
   SDL_Window* prev = activeWindow;
   activeWindow = hwnd;
@@ -293,5 +293,9 @@ void SetWindowLongA(SDL_Window *hwnd, int idx, void *lval) {
 }
 SDL_Window *GetActiveWindow() {
   return activeWindow;
+}
+bool SetWindowTextA(SDL_Window *hwnd, const char *str) {
+  SDL_SetWindowTitle(hwnd, str);
+  return true;
 }
 

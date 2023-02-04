@@ -241,7 +241,7 @@ OSStatus MacPath2FSRef() {
 
 void __ZN16CQuickTimePlayer7PlayAllEPbPFvvEb(void* this_ptr, bool* isDone,
                                              void(*)(), bool) {
-  *isDone = true;
+  *isDone = false;
 }
 
 struct noOpvtbl {
