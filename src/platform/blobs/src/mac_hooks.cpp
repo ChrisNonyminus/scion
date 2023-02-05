@@ -210,8 +210,10 @@ CFURLRef CFBundleCopyResourceURL(
   memset(path, 0, 1024);
   strcpy(path, getenv("HOME"));
   strcat(path, "/.scion/MacRes/");
-  strcat(path, subDirName->str);
-  strcat(path, "/");
+  if (subDirName != NULL) {
+    strcat(path, subDirName->str);
+    strcat(path, "/");
+  }
   strcat(path, resourceName->str);
   __CFURL* ref = static_cast<__CFURL *>(malloc(sizeof(__CFURL)));
   ref->str = strdup(path);
@@ -239,9 +241,32 @@ OSStatus MacPath2FSRef() {
   return -1; // stub
 }
 
+CGError CGGetDisplaysWithOpenGLDisplayMask(CGOpenGLDisplayMask mask, uint32_t
+maxDisplays, CGDirectDisplayID* displays, uint32_t* matchingDisplayCount) {
+  for (int i = 0; i < SDL_GetNumVideoDisplays(); i++) {
+    displays[i] = new _CGDirectDisplayID;
+    (displays[i])->displayIdx = i;
+  }
+  *matchingDisplayCount = SDL_GetNumVideoDisplays();
+  return 0;
+}
+
+CGDirectDisplayID CGMainDisplayID(void) {
+  static CGDirectDisplayID mainDisplay = new _CGDirectDisplayID;
+  mainDisplay->displayIdx = 0;
+  return mainDisplay;
+}
+extern OSErr 
+DMGetGDeviceByDisplayID(
+  DisplayIDType   displayID,
+  GDHandle *      displayDevice,
+  Boolean         failToMain) {
+    return -1;
+  }
+
 void __ZN16CQuickTimePlayer7PlayAllEPbPFvvEb(void* this_ptr, bool* isDone,
                                              void(*)(), bool) {
-  *isDone = false;
+  *isDone = true;
 }
 
 struct noOpvtbl {
@@ -256,6 +281,16 @@ void __ZN16CQuickTimePlayerC1EPKcbbNS_9ePosFlagsE(noOpvtbl **this_ptr) {
 }
 void __ZN16CQuickTimePlayer11SetMovieBoxEP4Rect() {}
 
+// TODO
+FNSubscriptionUPP
+NewFNSubscriptionUPP(FNSubscriptionProcPtr userRoutine) {
+  return userRoutine;
+}
+OSStatus  FNSubscribeByPath(const UInt8 *directoryPath, FNSubscriptionUPP
+callback, void *refcon, OptionBits flags, FNSubscriptionRef *subscription) {
+  return 0;
+}
+
 void HookMiscCarbonFunctions() {
   HOOK_FUNC(SetThemeCursor)
   HOOK_FUNC(ThreadBeginCritical)
@@ -265,6 +300,9 @@ void HookMiscCarbonFunctions() {
   HOOK_FUNC(GetProcessPID);
 
   HOOK_FUNC(GetCurrentThread)
+
+  HOOK_FUNC(NewFNSubscriptionUPP)
+  HOOK_FUNC(FNSubscribeByPath)
 
   /*HOOK_FUNC(GetCurrentEventLoop)
   HOOK_FUNC(GetMainEventLoop)
@@ -304,4 +342,6 @@ void HookCoreGraphicsFunctions() {
   HOOK_FUNC(CGDisplayBestModeForParameters)
   HOOK_FUNC(CGGetActiveDisplayList)
   HOOK_FUNC(CGDisplayIDToOpenGLDisplayMask)
+  HOOK_FUNC(CGGetDisplaysWithOpenGLDisplayMask)
+  HOOK_FUNC(CGMainDisplayID)
 }

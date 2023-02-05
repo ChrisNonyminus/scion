@@ -37,9 +37,9 @@ bool DeleteDC() {
 int32_t MonitorFromWindow(SDL_Window *hwnd, uint32_t dwFlags) {
   int32_t displayIndex = SDL_GetWindowDisplayIndex(hwnd);
   if (displayIndex < 0) {
-    return 0;
+    return -1;
   }
-  return displayIndex + 1;
+  return displayIndex;
 }
 
 /*The InvalidateRect function adds a rectangle to the specified window's update

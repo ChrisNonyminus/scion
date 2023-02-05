@@ -67,8 +67,7 @@ enum FileAccess {
 int GetFileAttributesA(const char *szFilePath) {
   char realpath[1024];
   strcpy(realpath, DOSPathToUnixPath(szFilePath));
-  char* thePath = (realpath[0] == 'C' && realpath[1] == ':' && realpath[2] ==
-      '\\') ? realpath + 3 : realpath;
+  char* thePath = (realpath[0] == 'C' && realpath[1] == ':') ? realpath + 3 : realpath;
   boost::filesystem::path p(thePath);
   /*// TODO/HACK: replace "TSBin/TSData" in szRealFileName with just "TSData"
   size_t pos = p.string().find("TSBin/TSData");
@@ -309,7 +308,7 @@ bool RemoveDirectoryW(const wchar_t *lpPathName) {
   return RemoveDirectoryA(szPathName);
 }
 bool FilenameMatchesWildcard(const char *szFilename, const char *szWildcard) {
-  return fnmatch(szWildcard, szFilename, 0) == 0;
+  return fnmatch(szWildcard, szFilename, FNM_CASEFOLD) == 0;
 }
 HANDLE FindFirstFileRecursive(dirent* it, DIR* dir, std::string wildcard,
                               std::string parent_path);

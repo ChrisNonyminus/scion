@@ -2,6 +2,9 @@
 #include <map>
 #include <vector>
 #include "Windowing.h"
+#include "FS.h"
+
+#include <SDL2/SDL_image.h>
 
 extern SDL_Window* gMainHWND;
 
@@ -51,19 +54,24 @@ void *CreateWindowExA(uint32_t dwExStyle,
                       HANDLE hMenu,
                       HANDLE hInstance,
                       void *lpParam) {
-  // TODO: The mac version seems to be calling CreateWindowExA wrong and
-  //  giving the window a position, width and height of INT_MIN.
+  int backend = /*SDL_WINDOW_OPENGL*/SDL_WINDOW_VULKAN;
   SDL_Window *mSDLWindow = SDL_CreateWindow(lpWindowName != NULL ?
                                             lpWindowName :
-                                            "Scion", SDL_WINDOWPOS_CENTERED,
-                                            SDL_WINDOWPOS_CENTERED, 1024,
-                                            768,
-                                            SDL_WINDOW_VULKAN| SDL_WINDOW_RESIZABLE);
+                                            "Scion", 0,
+                                            0, 800,
+                                            600,
+                                            backend|
+                                            SDL_WINDOW_RESIZABLE);
 
   SDL_HideWindow(mSDLWindow);
-  gMainHWND = mSDLWindow;
+  if (gMainHWND == NULL) {
+    gMainHWND = mSDLWindow;
+  }
   //SDL_AddTimer(16, OnPaintCallback, NULL);
   //pthread_create(&windowThread, NULL, WindowCallbackRoutine, NULL);
+  if (backend == SDL_WINDOW_OPENGL) {
+    gladLoadGL((GLADloadfunc) SDL_GL_GetProcAddress);
+  }
   return mSDLWindow;
 
 }
@@ -105,10 +113,8 @@ bool GetClientRect(HWND hWnd, LPRECT lpRect) {
     wind = (SDL_Window *) hWnd;
   if (wind == NULL)
     return false;
-  SDL_GetWindowPosition(wind, &lpRect->left, &lpRect->top);
+  lpRect->left = lpRect->top = 0;
   SDL_GetWindowSize(wind, &lpRect->right, &lpRect->bottom);
-  lpRect->right += lpRect->left;
-  lpRect->bottom += lpRect->top;
   return true;
 
 }
@@ -128,7 +134,7 @@ SDL_Cursor *LoadCursorA(HANDLE hInstance, const char *lpCursorName) {
   SDL_Cursor *cursor = NULL;
   // TODO
   cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_ARROW);
-  SDL_SetCursor(cursor);
+  //SDL_SetCursor(cursor);
   return cursor;
 }
 
@@ -258,7 +264,7 @@ bool DispatchMessageA(LPMSG lpMsg) {
     return __ZN11nGZGraphic410cCanvasW3210WindowProcEP6HWND__jjl(lpMsg->hwnd,
                                                                  lpMsg->message,
                                                                  lpMsg->wParam,
-                                                                 lpMsg->lParam) != 0;
+                                                                 lpMsg->lParam) == 0;
   }
   return false;
 }
@@ -283,12 +289,23 @@ SDL_Window *SetActiveWindow(SDL_Window *hwnd) {
   return prev;
 }
 SDL_Cursor *LoadCursorFromFileA(const char *lpFileName) {
+  lpFileName = DOSPathToUnixPath(lpFileName);
+  if (lpFileName[0] == 'C' && lpFileName[1] == ':') {
+    lpFileName += 3;
+  }
   SDL_Cursor *cursor = NULL;
   // TODO
-  cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_ARROW);
-  SDL_SetCursor(cursor);
-  return cursor;
+  cursor = SDL_CreateColorCursor(IMG_Load(lpFileName), 0, 0);
+  return SetCursor(cursor);
 }
+
+SDL_Cursor* SetCursor(SDL_Cursor* hCursor) {
+  if (hCursor == NULL)
+    SDL_SetCursor(SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_ARROW));
+  else SDL_SetCursor(hCursor);
+  return SDL_GetCursor();
+}
+
 bool DestroyCursor(SDL_Cursor *cursor) {
   SDL_FreeCursor(cursor);
   return true;

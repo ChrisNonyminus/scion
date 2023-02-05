@@ -40,7 +40,7 @@ ALL_OBJECTS += build/macho-loader/log.o
 ALL_OBJECTS += build/macho-loader/fat.o
 #ALL_OBJECTS += build/macho-loader/ld-mac.o
 
-.PHONY: dxvk-native openssl-0.9.7 mac-headers
+.PHONY: dxvk-native openssl-0.9.7 mac-headers dxvk-native-clean
 
 # For each framework in the src/MacFrameworks/MacOSX10.4u.sdk/System/Library/Frameworks folder (recursive, folder name ends with .framework), make a symlink in build/src/MacFrameworks that points to the headers folder, but named after the framework name (without the .framework extension), if it doesn't already exist
 # This is so that the gcc linux compiler can find the headers
@@ -59,7 +59,7 @@ MAC_CFLAGS :=  -Wno-multichar -Isrc/MacFrameworks/MacOSX10.4u.sdk/Developer/Head
 
 CXXFLAGS = $(CFLAGS)
 CXXFLAGS += $(MAC_CFLAGS)  -Wno-unknown-pragmas -Idxvk-native/include -Idxvk-native/include -Idxvk-native/include/native  -Idxvk-native/include/native/windows  -Idxvk-native/include/native/directx -Ithird_party/openssl-0.9.7/include
-CXXFLAGS += -D_GLIBCXX_USE_CXX11_ABI=0 -fabi-version=2
+CXXFLAGS += -D_GLIBCXX_USE_CXX11_ABI=0 
 CXXFLAGS += #-ggdb -fsanitize=address -fno-omit-frame-pointer
 
 
@@ -88,8 +88,11 @@ build:
 
 dxvk-native:
 ifeq ($(wildcard ./dxvk-native-master/.),)
-	$(shell CC=gcc -m32 -march=i686 CXX=i686-linux-gnu-g++-12  ./dxvk/package-native.sh master ./ --no-package --dev-build)
+	$(shell ./dxvk/package-native.sh master ./ --no-package --dev-build)
 endif
+
+dxvk-native-clean:
+	rm -rf ./dxvk-native-master
 
 openssl-0.9.7:
 	cd third_party/openssl-0.9.7 && $(MAKE)
@@ -109,7 +112,7 @@ endif
 
 $(TARGET_GAME): check-env build dxvk-native openssl-0.9.7 $(ALL_OBJECTS) libmac.so
 	cp dxvk-native-master/usr/lib32/libdxvk_d3d9.so .
-	$(CXX) -m32 -g -o $@ -T $(TARGET_GAME).ld -Wl,-Map,build/$@.map -fabi-version=2 $(ALL_OBJECTS) -std=c++98 -l:libboost_system.a -l:libboost_filesystem.a -L/usr/local/i386-linux-gnu/lib -llua -llualib `sdl2-config --libs` -lGL -ldl   -L. -ldxvk_d3d9 -l:third_party/openssl-0.9.7/libssl.a -l:third_party/openssl-0.9.7/libcrypto.a -lvulkan #-ggdb -fsanitize=address -fno-omit-frame-pointer -static-libasan -lrt
+	$(CXX) -m32 -g -o $@ -T $(TARGET_GAME).ld -Wl,-Map,build/$@.map  $(ALL_OBJECTS) -std=c++98 -l:libboost_system.a -l:libboost_filesystem.a -L/usr/local/i386-linux-gnu/lib -llua -llualib `sdl2-config --libs` -lGL -ldl   -L. -ldxvk_d3d9 -l:third_party/openssl-0.9.7/libssl.a -l:third_party/openssl-0.9.7/libcrypto.a -lvulkan  -lSDL2_image #-ggdb -fsanitize=address -fno-omit-frame-pointer -static-libasan -lrt
 
 
 

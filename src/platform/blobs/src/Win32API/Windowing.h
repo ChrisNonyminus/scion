@@ -66,6 +66,8 @@ SDL_Cursor *LoadCursorFromFileA(
     /*in*/ const char* lpFileName
     );
 
+SDL_Cursor *SetCursor(SDL_Cursor* hCursor);
+
 bool DestroyCursor(SDL_Cursor* cursor);
 
 typedef struct tagMSG {

@@ -318,6 +318,8 @@ void __GLOBAL__I_Reset_Swap_EnumLists() {
 #define _THREAD_setup_ADDR 0x005745AC
 #define _stat_ADDR 0x000048A4
 
+#define __ZNSs6assignIPKcEERSsT_S3__ADDR 0x0006FD92
+
 #endif
 
 #include <string>
@@ -499,6 +501,8 @@ void __attribute__((optimize("O2"))) std_string_begin_override() {
       ".att_syntax prefix");
 }
 
+
+
 void* operator_new_override(size_t size) {
   return _Znwj(LDMac::alignMem(size, 1024));
 }
@@ -563,6 +567,11 @@ int fnmatch_override(const char *pattern, const char *string, int flags) {
       "[DEBUG] The game is checking if \"%s\" matches \"%s\"...\n", string,
       pattern);
   return fnmatch(pattern, string, flags);
+}
+
+extern "C" void _ZNSs6assignIPKcEERSsT_S3_(std::string* this_ptr, const char*
+a2, const char* a3) {
+  this_ptr->replace(this_ptr->begin(), this_ptr->end(), a2, a3);
 }
 
 
@@ -876,6 +885,9 @@ void do_hooks() {
   HOOK_FUNC(atexit)
   hook_function(gMachO->GetSymbolAddr("__Z12THREAD_setupv"), CAST_CPP_FUNCPTR
   (THREAD_setup));
+  HOOK_FUNC(_ZNSs6assignIPKcEERSsT_S3_)
+
+  hook_function(gMachO->GetSymbolAddr("_fopen"), CAST_CPP_FUNCPTR(fopen));
 
   DoASLHooks();
   DoRZWinAPIHooks();

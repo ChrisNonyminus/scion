@@ -18004,7 +18004,7 @@ hook_function(_mprotect_ADDR, CAST_CPP_FUNCPTR(mprotect));
 hook_function(_munmap_ADDR, CAST_CPP_FUNCPTR(munmap));
 hook_function(_nanosleep_ADDR, CAST_CPP_FUNCPTR(nanosleep));
 //hook_function(_p2cstrcpy_ADDR, CAST_CPP_FUNCPTR(p2cstrcpy));
-//hook_function(_pow_ADDR, CAST_CPP_FUNCPTR(pow));
+hook_function(_pow_ADDR, CAST_CPP_FUNCPTR(powl));
 hook_function(_powf_ADDR, CAST_CPP_FUNCPTR(powf));
 hook_function(_printf_ADDR, CAST_CPP_FUNCPTR(printf));
 hook_function(_pthread_cond_broadcast_ADDR, CAST_CPP_FUNCPTR(pthread_cond_broadcast));
