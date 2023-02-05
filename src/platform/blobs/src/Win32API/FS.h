@@ -18,7 +18,7 @@ struct FindResult {
   boost::filesystem::path fullpath;
 };
 extern "C" {
-uint32_t GetFileAttributesA(/*in*/ const char *szFilePath);
+int GetFileAttributesA(/*in*/ const char *szFilePath);
 HANDLE CreateFileA(
     /*in*/ const char *lpFileName,
     /*in*/ uint32_t dwDesiredAccess,
@@ -144,7 +144,12 @@ bool SetEndOfFile(
     /*in*/ HANDLE hFile
 );
 
+bool CopyFileA(const char* lpExistingFileName, const char* lpNewFileName,
+               bool bFailIfExists);
 
+bool FlushFileBuffers(HANDLE hFile);
+
+const char *DOSPathToUnixPath(const char *szDosPath);
 };
 extern "C"
 void __Z9SplitpathPKcPcS1_S1_S1_(char* path, char* drive, char* dir, char*

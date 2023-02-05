@@ -196,5 +196,11 @@ void HookGZFrameFunctions() {
   /*hook_function(gMachO->GetSymbolAddr
   ("__Z21ConvertStringEncodingPKvmlR10cIGZString"), CAST_CPP_FUNCPTR
   (_Z21ConvertStringEncodingPKvmlR10cIGZString));*/
+
+  /*uint8_t
+  Patch_0099AFDE_DontCallThisSpecificVirtualItCausesTheGameToShitItself[8] =
+      {0x90,0x90,0x90,0x90,0x90,0x90,0x90,0x90};
+  memcpy((void*)0x0099AFDE,
+         Patch_0099AFDE_DontCallThisSpecificVirtualItCausesTheGameToShitItself, 8);*/
 #endif
 }

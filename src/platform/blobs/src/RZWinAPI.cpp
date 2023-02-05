@@ -86,6 +86,8 @@ void DoRZWinAPIHooks() {
   HOOK_FUNC(GetFileSize)
   HOOK_FUNC(SetEndOfFile)
   HOOK_FUNC(SetFilePointer)
+  HOOK_FUNC(CopyFileA)
+  HOOK_FUNC(FlushFileBuffers)
 
   HOOK_FUNC(InterlockedExchangeAdd)
   HOOK_FUNC(GetCurrentThreadId)
@@ -99,6 +101,7 @@ void DoRZWinAPIHooks() {
 
   HOOK_FUNC(DirectSoundCreate)
   HOOK_FUNC(Direct3DCreate9)
+  //HOOK_FUNC(D3DXLoadSurfaceFromMemory)
 
   HOOK_FUNC(GetLocaleInfoA)
 
@@ -125,6 +128,9 @@ void DoRZWinAPIHooks() {
   HOOK_FUNC(SetWindowLongA)
   HOOK_FUNC(GetActiveWindow)
   HOOK_FUNC(SetWindowTextA)
+  HOOK_FUNC(BeginPaint)
+  HOOK_FUNC(EndPaint)
+  HOOK_FUNC(SendMessageA)
 
   HOOK_FUNC(GetTickCount)
   HOOK_FUNC(timeGetTime)

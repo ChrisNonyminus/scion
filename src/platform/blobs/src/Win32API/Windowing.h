@@ -93,6 +93,13 @@ bool PostMessageA(
     /*in*/ long lParam
     );
 
+int SendMessageA(
+    SDL_Window* hWnd,
+    uint32_t Msg,
+    uintptr_t wParam,
+    long lParam
+    );
+
 bool DispatchMessageA(
     /*in*/ LPMSG lpMsg
     );

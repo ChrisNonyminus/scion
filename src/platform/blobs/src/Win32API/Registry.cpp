@@ -1,4 +1,5 @@
 #include "Registry.h"
+#include "FS.h"
 
 #include <iostream>
 #include <fstream>
@@ -172,6 +173,13 @@ void Win32API::InitRegistry() {
     keyList.defaultKey.value = path + "TSBin\\" + mAppNames[i];
     keyList.defaultKey.type = 1;
 
+    // create link from TSData/ to TSBin/TSData/
+    std::string tsbin = path + "TSBin";
+    mkdir(DOSPathToUnixPath(tsbin.c_str()), 0777);
+    tsbin += "/TSData";
+    std::string tsdata = path + "TSData";
+    symlink(DOSPathToUnixPath(tsdata.c_str()), DOSPathToUnixPath(tsbin.c_str
+    ()));
   }
   // initialize the main game registry key ("Software\\EA GAMES\\Sims2.exe")
   std::string key = "Software\\EA GAMES\\Sims2.exe";
@@ -326,4 +334,27 @@ int RegSetValueExA(void *hKey,
   }
   printf("[ERROR] RegSetValueExA: Key %s not found.\n", lpValueName);
   return 2;
+}
+std::string GetSims2BaseGameTSDataDir() {
+  Win32API::RegistryKeyList& registry =
+      Win32API::gRegistry["Software\\Microsoft\\Windows"
+                                             "\\CurrentVersion"
+                             "\\App Paths\\Sims2.exe"];
+  for (size_t i = 0; i < registry.keys.size(); i++) {
+    if (registry.keys[i].name == "Path") {
+      return registry.keys[i].value + "TSData";
+    }
+  }
+  return ".";
+}
+
+// Takes in a path and replaces a substring equal to "%GameDataDir%" with the the value of GetSims2BaseGameTSDataDir()
+std::string ResolveSims2BaseGameTSDataPath(std::string path) {
+  std::string gameDataDir = GetSims2BaseGameTSDataDir();
+  size_t pos = path.find("%GameDataDir%");
+  if (pos == std::string::npos) {
+    return path;
+  }
+  std::string newPath = gameDataDir + path.substr(pos + 13);
+  return newPath;
 }

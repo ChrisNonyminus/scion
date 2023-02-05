@@ -1,14 +1,43 @@
 #define GLAD_GL_IMPLEMENTATION
 #include <map>
+#include <vector>
 #include "Windowing.h"
 
 extern SDL_Window* gMainHWND;
 
 extern "C" uint32_t OnPaintCallback(uint32_t interval, void* param) {;
-  __ZN11nGZGraphic410cCanvasW327OnPaintEP6HWND__(GetWindowLongA
-                                                     (GetActiveWindow(), -21), GetActiveWindow());
+  if (GetWindowLongA(gMainHWND, -21) == NULL)
+    return 16;
+  if (gMainHWND == NULL)
+    return 16;
+  /*__ZN11nGZGraphic410cCanvasW327OnPaintEP6HWND__(GetWindowLongA
+                                                     (gMainHWND, -21), gMainHWND);*/
+  MSG msg;
+  msg.hwnd = gMainHWND;
+  msg.message = 15;
+  DispatchMessageA(&msg);
   return 16;
 }
+
+void* WindowCallbackRoutine(void*) {
+  static uint64_t msLastOnPaint = time(NULL) * 1000;
+  uint64_t msNow = time(NULL) * 1000;
+  while (true) {
+    msNow = time(NULL) * 1000;
+    uint64_t interval = (msNow - msLastOnPaint);
+    if (interval >= 16 ) {
+      OnPaintCallback(0, NULL);
+      msNow = msLastOnPaint;
+      continue;
+    }
+
+    if (gMainHWND == NULL) {
+      break;
+    }
+  }
+}
+
+pthread_t windowThread;
 
 void *CreateWindowExA(uint32_t dwExStyle,
                       const char *lpClassName,
@@ -33,7 +62,8 @@ void *CreateWindowExA(uint32_t dwExStyle,
 
   SDL_HideWindow(mSDLWindow);
   gMainHWND = mSDLWindow;
-  SDL_AddTimer(16, OnPaintCallback, NULL);
+  //SDL_AddTimer(16, OnPaintCallback, NULL);
+  //pthread_create(&windowThread, NULL, WindowCallbackRoutine, NULL);
   return mSDLWindow;
 
 }
@@ -65,7 +95,7 @@ bool UpdateWindow(
   if (wind == NULL)
     return false;
   //SDL_UpdateWindowSurface(wind);
-
+  SendMessageA(wind, 15, 0, 0);
   //SDL_GL_SwapWindow(wind);
   return true;
 }
@@ -120,6 +150,9 @@ SDL_Cursor *LoadCursorA(HANDLE hInstance, const char *lpCursorName) {
 #define WM_MBUTTONUP                    0x0208
 #define WM_MBUTTONDBLCLK                0x0209
 #define WM_MOUSEWHEEL                   0x020A
+
+std::vector<MSG> sMsgQueue;
+
 bool PeekMessageA(LPMSG lpMsg,
                   SDL_Window *hWnd,
                   uint32_t wMsgFilterMin,
@@ -136,6 +169,13 @@ bool PeekMessageA(LPMSG lpMsg,
     wereIn = true;
     return true;
   }
+
+  if (sMsgQueue.size() > 0) {
+    *lpMsg = sMsgQueue[0];
+    sMsgQueue.erase(sMsgQueue.begin());
+    return sMsgQueue.size() > 0;
+  }
+
   SDL_Event event;
   if (SDL_PollEvent(&event)) {
     switch (event.type) {
@@ -198,59 +238,42 @@ bool PeekMessageA(LPMSG lpMsg,
   return SDL_PeepEvents(NULL, 1, SDL_GETEVENT, SDL_FIRSTEVENT, SDL_LASTEVENT)
   > 0;
 }
+int SendMessageA(SDL_Window *hWnd,
+                 uint32_t Msg,
+                 uintptr_t wParam,
+                 long lParam) {
+  MSG msg;
+  msg.hwnd = hWnd;
+  msg.message = Msg;
+  msg.wParam = wParam;
+  msg.lParam = lParam;
+
+  return DispatchMessageA(&msg);
+}
+
+bool DispatchMessageA(LPMSG lpMsg) {
+  if (!lpMsg) return false;
+  if (!lpMsg->hwnd) lpMsg->hwnd = gMainHWND;
+  if (lpMsg->hwnd) {
+    return __ZN11nGZGraphic410cCanvasW3210WindowProcEP6HWND__jjl(lpMsg->hwnd,
+                                                                 lpMsg->message,
+                                                                 lpMsg->wParam,
+                                                                 lpMsg->lParam) != 0;
+  }
+  return false;
+}
 bool PostMessageA(
     /*in, optional*/ SDL_Window* hWnd,
     /*in*/ uint32_t Msg,
     /*in*/ uintptr_t wParam,
     /*in*/ long lParam
 ) {
-  SDL_Event event;
-  switch (Msg) {
-  case WM_QUIT: {
-    event.type = SDL_QUIT;
-    break;
-  }
-  case WM_KEYDOWN: {
-    event.type = SDL_KEYDOWN;
-    event.key.keysym.scancode = static_cast<SDL_Scancode>(wParam);
-    break;
-  }
-  case WM_KEYUP: {
-    event.type = SDL_KEYUP;
-    event.key.keysym.scancode = static_cast<SDL_Scancode>(wParam);
-    break;
-  }
-  case WM_MOUSEMOVE: {
-    event.type = SDL_MOUSEMOTION;
-    event.motion.state = wParam;
-    event.motion.x = lParam & 0xFFFF;
-    event.motion.y = lParam >> 16;
-    break;
-  }
-  case WM_LBUTTONDOWN: {
-    event.type = SDL_MOUSEBUTTONDOWN;
-    event.button.button = wParam;
-    event.button.x = lParam & 0xFFFF;
-    event.button.y = lParam >> 16;
-    break;
-  }
-  case WM_LBUTTONUP: {
-    event.type = SDL_MOUSEBUTTONUP;
-    event.button.button = wParam;
-    event.button.x = lParam & 0xFFFF;
-    event.button.y = lParam >> 16;
-    break;
-  }
-  case WM_MOUSEWHEEL: {
-    event.type = SDL_MOUSEWHEEL;
-    event.wheel.y = wParam;
-    event.wheel.x = lParam;
-    break;
-  }
-  default: printf("WARNING! Unknown message type %08X, wParam %d, lParam "
-                  "%d\n",Msg, wParam, lParam); return false;
-  }
-  SDL_PushEvent(&event);
+  MSG msg;
+  msg.hwnd = hWnd;
+  msg.message = Msg;
+  msg.wParam = wParam;
+  msg.lParam = lParam;
+  sMsgQueue.push_back(msg);
   return true;
 }
 static SDL_Window* activeWindow;
@@ -270,17 +293,6 @@ bool DestroyCursor(SDL_Cursor *cursor) {
   SDL_FreeCursor(cursor);
   return true;
 }
-bool DispatchMessageA(LPMSG lpMsg) {
-  if (!lpMsg) return false;
-  if (!lpMsg->hwnd) lpMsg->hwnd = gMainHWND;
-  if (lpMsg->hwnd) {
-    return __ZN11nGZGraphic410cCanvasW3210WindowProcEP6HWND__jjl(lpMsg->hwnd,
-                                                          lpMsg->message,
-                                                          lpMsg->wParam,
-                                                          lpMsg->lParam) != 0;
-  }
-  return false;
-}
 
 std::map<int, void*> longValues;
 
@@ -298,4 +310,3 @@ bool SetWindowTextA(SDL_Window *hwnd, const char *str) {
   SDL_SetWindowTitle(hwnd, str);
   return true;
 }
-

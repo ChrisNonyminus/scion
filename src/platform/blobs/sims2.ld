@@ -26,6 +26,8 @@ sLastError = 0x00032A37;
 
 _ZN9cRZThread13SetThreadNameEPc = 0x005336F4;
 
+_ZN3ASL22mNeedsUnicodeTextInputE = 0x01CE16DC;
+
 SECTIONS
 {
     . = 0x04000000;

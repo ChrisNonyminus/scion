@@ -6,5 +6,6 @@
 
 struct IDirect3D9;
 extern "C" IDirect3D9 *Direct3DCreate9(uint32_t sdk_version);
+extern "C" int D3DXLoadSurfaceFromMemory(); // TODO: stubbed
 
 #endif //BLOBS_SRC_WIN32API_DIRECTX_DIRECT3D_H

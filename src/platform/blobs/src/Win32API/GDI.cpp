@@ -49,3 +49,9 @@ bool InvalidateRect(SDL_Window *hwnd, const RECT *lpRect, bool bErase) {
   //SDL_UpdateWindowSurface(hwnd);
   return true;
 }
+int BeginPaint(SDL_Window *hwWnd) {
+  return 0;
+}
+bool EndPaint(SDL_Window *hwWnd) {
+  return true;
+}

@@ -45,6 +45,9 @@ extern "C" bool CreateDCA(); // STUB
 extern "C" bool GetDeviceCaps(); // STUB
 extern "C" bool DeleteDC(); // STUB
 
+extern "C" int BeginPaint(SDL_Window* hwWnd); // STUB
+extern "C" bool EndPaint(SDL_Window* hwWnd); // STUB
+
 int32_t MonitorFromWindow(
     /*in*/ SDL_Window *hwnd, // A handle to the window of interest.
     /*in*/

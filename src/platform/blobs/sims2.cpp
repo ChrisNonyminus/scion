@@ -33,6 +33,7 @@ extern "C" int RealMain(); // the WinMain function in
 
 namespace ASL {
 extern char mAppCmdLine[];
+extern bool mNeedsUnicodeTextInput;
 }
 
 // static initializers I have to call from here
@@ -58,6 +59,8 @@ int main(int argc, char **argv) {
     strcat(ASL::mAppCmdLine, argv[i]);
     strcat(ASL::mAppCmdLine, " ");
   }
+
+  ASL::mNeedsUnicodeTextInput = true;
   
 
   return RealMain();

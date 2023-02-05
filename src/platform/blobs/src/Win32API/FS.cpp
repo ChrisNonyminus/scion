@@ -6,6 +6,8 @@
  * */
 
 #include "FS.h"
+#include "Registry.h"
+#include "fcaseopen/fcaseopen.h"
 
 #include <fnmatch.h>
 
@@ -62,9 +64,23 @@ enum FileAccess {
   GENERIC_ALL = 0x10000000
 };
 
-uint32_t GetFileAttributesA(const char *szFilePath) {
-  boost::filesystem::path p(szFilePath);
+int GetFileAttributesA(const char *szFilePath) {
+  char realpath[1024];
+  strcpy(realpath, DOSPathToUnixPath(szFilePath));
+  char* thePath = (realpath[0] == 'C' && realpath[1] == ':' && realpath[2] ==
+      '\\') ? realpath + 3 : realpath;
+  boost::filesystem::path p(thePath);
+  /*// TODO/HACK: replace "TSBin/TSData" in szRealFileName with just "TSData"
+  size_t pos = p.string().find("TSBin/TSData");
+  if (pos != std::string::npos) {
+    p = p.string().substr(0, pos) + "TSData" +
+        (p.string().size() > pos + 13 ? p.string()
+            .substr(pos + 13) : "/");
+  }*/
   if (!boost::filesystem::exists(p)) {
+    return -1;
+  }
+  if (p.empty()) {
     return -1;
   }
   uint32_t ret = 0;
@@ -77,6 +93,11 @@ uint32_t GetFileAttributesA(const char *szFilePath) {
   if (boost::filesystem::is_symlink(p)) {
     ret |= FILE_ATTRIBUTE_REPARSE_POINT;
   }
+  // hack
+  if (p.string().find("Sims2/Game") != std::string::npos) {
+    ret |= FILE_ATTRIBUTE_READONLY;
+  }
+
   /*if (p.root_name() == "/tmp") {
     ret |= FILE_ATTRIBUTE_TEMPORARY;
   }
@@ -126,29 +147,44 @@ HANDLE CreateFileA(const char *lpFileName,
   }
   printf("[DEBUG, Win32API::FS] Creating (or opening?) a file at path \"%s\""
          ".\n", szRealFileName.c_str());
-  // TODO/HACK: replace "TSBin/TSData" in szRealFileName with just "TSData"
+  /*// TODO/HACK: replace "TSBin/TSData" in szRealFileName with just "TSData"
   size_t pos = szRealFileName.find("TSBin/TSData");
   if (pos != std::string::npos) {
     szRealFileName = szRealFileName.substr(0, pos) + "TSData" +
         (szRealFileName.size() > pos + 13 ? szRealFileName
             .substr(pos + 13) : "/");
-  }
+  }*/
   char *szMode = NULL;
   if (dwDesiredAccess == GENERIC_READ) {
     szMode = "rb";
+    if (!boost::filesystem::exists(szRealFileName)) {
+      FILE* tmpfp = fopen(szRealFileName.c_str(), "wb");
+      if (tmpfp == NULL) {
+        sLastError = 5;
+        return (HANDLE)-1;
+      }
+      fclose(tmpfp);
+    }
   } else if (dwDesiredAccess == GENERIC_WRITE) {
     szMode = "wb";
+    if (GetFileAttributesA(lpFileName) & FILE_ATTRIBUTE_READONLY) {
+      sLastError = 5;
+      return (HANDLE)-1;
+    }
   } else if (dwDesiredAccess == (GENERIC_READ | GENERIC_WRITE)) {
     szMode = "rb+";
   }
   if (szMode == NULL) {
     printf("[ERROR, Win32API::FS] Failed to determine mode for opening file. "
            "dwDesiredAccess was %d\n", dwDesiredAccess);
-    return NULL;
+    sLastError = 5;
+    return (HANDLE)-1;
   }
-  FILE *fp = fopen(szRealFileName.c_str(), szMode);
-  HANDLE h = HANDLE_Create(Handle_FileHandle, fp);
-  return h;
+  FILE *fp = fcaseopen(szRealFileName.c_str(), szMode);
+  if (fp == NULL) {
+    sLastError = 5;
+  }
+  return fp == NULL ? (HANDLE)-1 : HANDLE_Create(Handle_FileHandle, fp);
 }
 bool ReadFile(HANDLE hFile,
               void *lpBuffer,
@@ -171,7 +207,7 @@ bool ReadFile(HANDLE hFile,
   size_t len = readlink(proclnk, filename, PATH_MAX);
   if (len > 0) {
     filename[len] = '\0';
-    printf("[Win32API::FS, DEBUG] Reading from file \"%s\"...\n", filename);
+    //printf("[Win32API::FS, DEBUG] Reading from file \"%s\"...\n", filename);
   }
   *lpNumberOfBytesRead = fread(lpBuffer, 1, nNumberOfBytesToRead, fp);
   return true;
@@ -306,13 +342,13 @@ HANDLE FindFirstFileA(
   } else {
     szRealFileName = lpFileName;
   }
-  // TODO/HACK: replace "TSBin/TSData" in szRealFileName with just "TSData"
+  /*// TODO/HACK: replace "TSBin/TSData" in szRealFileName with just "TSData"
   size_t pos = szRealFileName.find("TSBin/TSData");
   if (pos != std::string::npos) {
     szRealFileName = szRealFileName.substr(0, pos) + "TSData" +
         (szRealFileName.size() > pos + 13 ? szRealFileName
             .substr(pos + 13) : "/");
-  }
+  }*/
   /*std::transform(szRealFileName.begin(), szRealFileName.end(), szRealFileName.begin(), tolower);*/
   std::string parent_path = (szRealFileName.substr(0, szRealFileName
       .find_last_of("/")));
@@ -322,7 +358,7 @@ HANDLE FindFirstFileA(
            bSearchAllFiles ? szRealFileName.c_str() : parent_path.c_str());
     return NULL;
   }
-  DIR *dir = opendir(bSearchAllFiles ? szRealFileName.c_str()
+  DIR *dir = caseopendir(bSearchAllFiles ? szRealFileName.c_str()
                                      : parent_path.c_str());
   std::string wildcard = lpFileName;
   /*std::transform(wildcard.begin(), wildcard.end(), wildcard.begin(),
@@ -373,53 +409,6 @@ HANDLE FindFirstFileA(
          lpFileName);
   return NULL;
 }
-HANDLE FindFirstFileRecursive(dirent* it, DIR* dir, std::string wildcard,
-                              std::string parent_path) {
-  char fullpath[1024];
-  strcpy(fullpath, parent_path.c_str());
-  strcat(fullpath, "/");
-  strcat(fullpath, it->d_name);
-  if (boost::filesystem::is_directory(boost::filesystem::path(fullpath))) {
-    DIR* dir2 = opendir(fullpath);
-    dirent* it2 = readdir(dir2);
-
-    for (; it2 != NULL; it2 = readdir(dir2)) {
-      if (strcmp(it2->d_name, ".") == 0 || strcmp(it2->d_name,
-                                                          "..") == 0) {
-        continue;
-      }
-      char fullpath2[1024];
-      strcpy(fullpath2, fullpath);
-      strcat(fullpath2, "/");
-      strcat(fullpath2, it2->d_name);
-      if (boost::filesystem::is_directory(boost::filesystem::path(fullpath2))) {
-        HANDLE maybe = FindFirstFileRecursive(it2, dir2, wildcard, fullpath);
-        if (maybe != NULL) {
-          return maybe;
-        }
-      }
-      if (FilenameMatchesWildcard(fullpath2, wildcard.c_str())) {
-        WIN32_FIND_DATA *lpFindFileData = new WIN32_FIND_DATA;
-        lpFindFileData->dwFileAttributes =
-            GetFileAttributesA(fullpath2);
-        lpFindFileData->nFileSizeHigh = 0;
-        lpFindFileData->nFileSizeLow =
-            boost::filesystem::is_directory(fullpath2) ?
-            0 : boost::filesystem::file_size(fullpath2);
-        strcpy(lpFindFileData->cFileName, it2->d_name);
-        FindResult *pResult = new FindResult;
-        pResult->it = readdir(dir2);
-        pResult->dir = dir2;
-        pResult->szWildcard = strdup(wildcard.c_str());
-        pResult->fullpath = fullpath;
-        printf("FindFirstFileA: %s\n", lpFindFileData->cFileName);
-        HANDLE handle = HANDLE_Create(Handle_FindFile, pResult);
-        return handle;
-      }
-    }
-  }
-  return NULL;
-}
 bool FindNextFileRecursive(FindResult* pResult, WIN32_FIND_DATA*
 lpFindFileData);
 bool FindNextFileA(
@@ -446,63 +435,6 @@ bool FindNextFileA(
         return true;
       }
     }*/
-    if (boost::filesystem::is_regular_file(fullpath) && FilenameMatchesWildcard
-    (fullpath,
-                                pResult->szWildcard)) {
-      lpFindFileData->dwFileAttributes =
-          GetFileAttributesA(fullpath);
-      lpFindFileData->nFileSizeHigh = 0;
-      lpFindFileData->nFileSizeLow =
-          boost::filesystem::file_size(fullpath);
-      strcpy(lpFindFileData->cFileName,
-             pResult->it->d_name);
-      printf("FindNextFileA: %s\n", lpFindFileData->cFileName);
-      pResult->it = readdir(pResult->dir);
-      return true;
-    }
-    pResult->it = readdir(pResult->dir);
-  }
-  return false;
-}
-bool FindNextFileRecursive(FindResult* pResult, WIN32_FIND_DATA*
-lpFindFileData) {
-  if (pResult->it == NULL)
-    return false;
-  char fullpath[1024];
-  strcpy(fullpath, pResult->fullpath.c_str());
-  strcat(fullpath, "/");
-  strcat(fullpath, pResult->it->d_name);
-  // assume we're starting with pResult pointing to a directory, so we must initialize a new pResult
-  if (pResult->it->d_type == DT_DIR) {
-    DIR* dir = opendir(fullpath);
-    dirent* it = readdir(dir);
-    FindResult* pResult2 = new FindResult;
-    pResult2->it = it;
-    pResult2->dir = dir;
-    pResult2->szWildcard = strdup(pResult->szWildcard);
-    pResult2->fullpath = fullpath;
-    if (FindNextFileRecursive(pResult2, lpFindFileData)) {
-      delete pResult2;
-      return true;
-    }
-    delete pResult2;
-  }
-  pResult->it = readdir(pResult->dir);
-  while (pResult->it != NULL) {
-    strcpy(fullpath, pResult->fullpath.c_str());
-    strcat(fullpath, "/");
-    strcat(fullpath, pResult->it->d_name);
-    if (strcmp(pResult->it->d_name, ".") == 0 || strcmp(pResult->it->d_name,
-                                                        "..") == 0) {
-      pResult->it = readdir(pResult->dir);
-      continue;
-    }
-    if (pResult->it->d_type == DT_DIR) {
-      pResult->it = readdir(pResult->dir);
-      if (FindNextFileRecursive(pResult, lpFindFileData)) {
-        return true;
-      }
-    }
     if (boost::filesystem::is_regular_file(fullpath) && FilenameMatchesWildcard
     (fullpath,
                                 pResult->szWildcard)) {
@@ -698,7 +630,7 @@ uint32_t SHGetFolderPathW(
   char path[1024];
   uint32_t ret = SHGetFolderPathA(hwnd, csidl, hToken, dwFlags, path);
   mbstowcs(pszPath, path, mbstowcs(NULL, path, 0));
-  pszPath[strlen(path) + 1] = L'\0';
+  pszPath[strlen(path)] = L'\0';
   return ret;
 }
 
@@ -746,16 +678,14 @@ DWORD SetFilePointer(HANDLE hFile,
   return ftell(fp);
 }
 
-void __Z9SplitpathPKcPcS1_S1_S1_(char* path, char* drive, char* dir, char* fname, char* ext) {
+void __Z9SplitpathPKcPcS1_S1_S1_(char* path, char* drive, char* dir,
+                                 char* fname, char* ext) {
   if (!path) return;
   path = (char*)DOSPathToUnixPath(path);
 
-  std::string spath(path);
-  /*if (spath.find("StuffPack") != std::string::npos) {
-    // HACK: game starts losing its shit and looking for subfolders in StuffPack
-    // with an egregious amount of chinese characters, let's avoid that
-    return;
-  }*/
+  //std::string spath(ResolveSims2BaseGameTSDataPath(path));
+
+
 
   printf("Splitting: %s\n", path);
   if (drive) {
@@ -765,7 +695,7 @@ void __Z9SplitpathPKcPcS1_S1_S1_(char* path, char* drive, char* dir, char* fname
 
   if (dir) {
     char tmp[1024];
-    strcpy(tmp, path);
+    strcpy(tmp, path[0] == '/' ? path + 1 : path);
     char* tmp2 = strrchr(tmp, '/');
     if (tmp2) {
       *(tmp2+1) = 0;
@@ -807,5 +737,23 @@ void __Z9SplitpathPKcPcS1_S1_S1_(char* path, char* drive, char* dir, char* fname
 
     printf("Ext is: %s\n", ext);
   }
+}
+bool CopyFileA(const char *lpExistingFileName,
+               const char *lpNewFileName,
+               bool bFailIfExists) {
+  std::ifstream src(DOSPathToUnixPath(lpExistingFileName), std::ios::binary);
+  std::ofstream dst(DOSPathToUnixPath(lpNewFileName), std::ios::binary);
+  dst << src.rdbuf();
+  return true;
+}
+bool FlushFileBuffers(HANDLE hFile) {
+  if (hFile == NULL) {
+    return false;
+  }
+  FILE *fp = (FILE *) hFile->ptr;
+  if (fp == NULL) {
+    return false;
+  }
+  return fflush(fp) == 0;
 }
 

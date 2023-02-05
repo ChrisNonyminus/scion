@@ -31,3 +31,6 @@ int RegSetValueExA(void *hKey,
 namespace Win32API {
 void InitRegistry();
 }
+
+std::string GetSims2BaseGameTSDataDir();
+std::string ResolveSims2BaseGameTSDataPath(std::string path);
